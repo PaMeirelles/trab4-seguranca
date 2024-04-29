@@ -7,10 +7,10 @@ public class Main {
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
 
         if(isFirstAccess){
-            Register.register_admin();
+            Register.registerAdmin();
         }
         else{
-            if(!Register.validate_admin()){
+            if(!Register.validateAdmin()){
                 return;
             }
         }
