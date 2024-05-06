@@ -5,12 +5,12 @@ public class Main {
         Main main = new Main();
 
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
-
+        Register r = new Register();
         if(isFirstAccess){
-            Register.registerAdmin();
+            r.registerAdmin();
         }
         else{
-            if(!Register.validateAdmin()){
+            if(!r.validateAdmin()){
                 return;
             }
         }

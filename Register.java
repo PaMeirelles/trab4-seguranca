@@ -3,11 +3,11 @@ public class Register {
     public String pathPrivateKey;
     public String secretPhrase;
     public Group group;
-    public static String password;
-    public static String confirmPassword;
+    public String password;
+    public String confirmPassword;
 
 
-    private static void checkInfo() throws InvalidPasswordFormatException, PasswordMismatchException {
+    private void checkInfo() throws InvalidPasswordFormatException, PasswordMismatchException, RepeatingCharactersException {
         if (!password.matches("^[0-9]{8,10}$")) {
             throw new InvalidPasswordFormatException("Invalid password format: Password must be 8-10 digits long.");
         }
@@ -15,12 +15,31 @@ public class Register {
             throw new PasswordMismatchException("Passwords do not match.");
         }
 
+        char prev = password.charAt(0);
+        for (int i = 1; i < password.length(); i++) {
+            char curr = password.charAt(i);
+            if (curr == prev) {
+                throw new RepeatingCharactersException("Password contains consecutive repeating characters.");
+            }
+        }
+
+
     }
 
-    public static void registerAdmin(){
+    private void fillForTest(){
+        this.pathCertificate = "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\admin-x509.crt";
+        this.pathPrivateKey = "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\admin-pkcs8-aes.pem";
+        this.secretPhrase = "admin";
+        this.group = Group.ADMIN;
+        this.password = "05062024";
+        this.confirmPassword = "05062024";
+    }
+
+    public void registerAdmin(){
+        this.fillForTest();
         return;
     }
-    public static boolean validateAdmin(){
+    public boolean validateAdmin(){
         return true;
     }
 }
