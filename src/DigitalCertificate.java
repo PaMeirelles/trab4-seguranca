@@ -1,4 +1,5 @@
 import java.io.FileInputStream;
+import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -13,6 +14,7 @@ public class DigitalCertificate {
     public String issuer;
     public String subjectFriendlyName;
     public String email;
+    public PublicKey publicKey;
 
     public DigitalCertificate(String certificateFilePath) throws Exception {
         FileInputStream fis = new FileInputStream(certificateFilePath);
@@ -31,6 +33,9 @@ public class DigitalCertificate {
         // Extract subject CN and E
         this.subjectFriendlyName = extractCommonName(certificate.getSubjectX500Principal().getName());
         this.email = extractEmail(certificate.getSubjectX500Principal().getName());
+
+        // Extract public key
+        this.publicKey = certificate.getPublicKey();
 
         fis.close();
     }

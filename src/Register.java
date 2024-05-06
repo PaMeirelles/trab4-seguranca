@@ -1,3 +1,12 @@
+import java.io.FileInputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+
 public class Register {
     public String pathCertificate;
     public String pathPrivateKey;
@@ -7,7 +16,15 @@ public class Register {
     public String confirmPassword;
     public DigitalCertificate digitalCertificate;
 
-    private void checkInfo() throws InvalidPasswordFormatException, PasswordMismatchException, RepeatingCharactersException {
+    private void validatePublicKey() throws Exception {
+        // Read the private key from the PEM file
+        FileInputStream privateKeyFile = new FileInputStream(this.pathPrivateKey);
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(privateKeyFile);
+        privateKeyFile.close();
+    }
+
+    private void checkInfo() throws Exception, RepeatingCharactersException {
         if (!password.matches("^[0-9]{8,10}$")) {
             throw new InvalidPasswordFormatException("Invalid password format: Password must be 8-10 digits long.");
         }
@@ -21,9 +38,9 @@ public class Register {
             if (curr == prev) {
                 throw new RepeatingCharactersException("Password contains consecutive repeating characters.");
             }
+            prev = curr;
         }
-
-
+        this.validatePublicKey();
     }
 
     private void fillForTest(){
@@ -35,11 +52,13 @@ public class Register {
         this.confirmPassword = "05062024";
     }
 
-    public void registerAdmin() throws Exception {
+    public void registerAdmin() throws Exception, RepeatingCharactersException {
         this.fillForTest();
         this.digitalCertificate = new DigitalCertificate(this.pathCertificate);
+        this.checkInfo();
         return;
     }
+
     public boolean validateAdmin(){
         return true;
     }
