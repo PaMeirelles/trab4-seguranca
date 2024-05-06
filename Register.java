@@ -5,7 +5,7 @@ public class Register {
     public Group group;
     public String password;
     public String confirmPassword;
-
+    public DigitalCertificate digitalCertificate;
 
     private void checkInfo() throws InvalidPasswordFormatException, PasswordMismatchException, RepeatingCharactersException {
         if (!password.matches("^[0-9]{8,10}$")) {
@@ -35,8 +35,9 @@ public class Register {
         this.confirmPassword = "05062024";
     }
 
-    public void registerAdmin(){
+    public void registerAdmin() throws Exception {
         this.fillForTest();
+        this.digitalCertificate = new DigitalCertificate(this.pathCertificate);
         return;
     }
     public boolean validateAdmin(){

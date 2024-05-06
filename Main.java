@@ -1,7 +1,7 @@
 public class Main {
     public DatabaseManager databaseManager;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Main main = new Main();
 
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
