@@ -13,11 +13,15 @@ import java.util.Base64;
 
 public class DatabaseManager {
     public static boolean isFirstAccess(){
+        // TODO
         return true;
+    }
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(Constants.CONNECTION_STRING);
     }
     public static boolean loginIsUnique(String login) throws Exception {
         String query = "SELECT COUNT(*) AS count FROM usuarios WHERE login = ?";
-        Connection connection = DriverManager.getConnection(Constants.CONNECTION_STRING);
+        Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);
 
         statement.setString(1, login);
@@ -26,9 +30,10 @@ public class DatabaseManager {
 
         if (resultSet.next()) {
             int count = resultSet.getInt("count");
+            connection.close();
             return count == 0;
         }
-
+        connection.close();
         return false;
     }
     private static byte[] generateSalt() {
@@ -39,18 +44,8 @@ public class DatabaseManager {
     }
 
     private static String preparePassword(String password){
-        String bcryptHash = OpenBSDBCrypt.generate(password.getBytes(), generateSalt(), Constants.COST_FACTOR);
-
-        String[] parts = bcryptHash.split("\\$");
-        String version = parts[1];
-        String cost = parts[2];
-        String salt = parts[3];
-        String hash = parts[4];
-
-        String encodedSalt = Base64.getEncoder().encodeToString(salt.getBytes());
-        String encodedHash = Base64.getEncoder().encodeToString(hash.getBytes());
-
-        return "$" + version + "$" + cost + "$" + encodedSalt + encodedHash;    }
+        return OpenBSDBCrypt.generate(password.getBytes(), generateSalt(), Constants.COST_FACTOR);
+      }
 
     private static byte[] preparePrivateKey(Key privateKey) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -93,7 +88,7 @@ public class DatabaseManager {
     }
 
     private static void saveUser(int kid, String login, String password, String friendlyName, Group group, Connection connection) throws SQLException {
-        String insertSQL = "INSERT INTO usuarios (key_id, login, password, friendly_name) VALUES (?, ?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO usuarios (key_id, group_id, login, password, friendly_name) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
 
         statement.setInt(1, kid);
@@ -105,10 +100,11 @@ public class DatabaseManager {
         statement.executeUpdate();
     }
 
-    public static void saveUser(String login, String password, Key privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException {
-        Connection connection = DriverManager.getConnection(Constants.CONNECTION_STRING);
+    public static void saveUser(String login, String password, Key privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException, ClassNotFoundException {
+        Connection connection = getConnection();
         int kid = saveKeys(privateKey, certificate, connection);
         String preparedPassword = preparePassword(password);
         saveUser(kid, login, preparedPassword, friendlyName, group, connection);
+        connection.close();
     }
 }

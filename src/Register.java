@@ -1,8 +1,8 @@
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
+import javax.crypto.*;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +11,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
@@ -22,16 +23,29 @@ public class Register {
     public String password;
     public String confirmPassword;
     public CertificateInfo certificateInfo;
-    public Key privateKey;
+    public PrivateKey privateKey;
     public X509Certificate certificate;
 
-    private void fillPrivateKey() throws NoSuchAlgorithmException {
+    private void fillPrivateKey() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(secretPhrase.getBytes());
 
         KeyGenerator keyGen = KeyGenerator.getInstance(Constants.KEY_GENERATOR_ALGO);
         keyGen.init(Constants.KEY_SIZE, rand);
-        this.privateKey = keyGen.generateKey();
+        Key chave = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        cipher.init(Cipher.DECRYPT_MODE, chave);
+        Path path = Paths.get(pathPrivateKey);
+        byte[] bytes = Files.readAllBytes(path);
+
+        String chavePrivadaBase64 = new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
+        chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "").trim();
+        chavePrivadaBase64 = chavePrivadaBase64.replaceAll("\\s+", "");
+        byte[] chavePrivadaBytes = Base64.getDecoder().decode(chavePrivadaBase64);
+
+        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
+        privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
     }
 
     private void fillCertificate() throws FileNotFoundException, CertificateException {
@@ -41,22 +55,6 @@ public class Register {
     }
 
     private void validateKey() throws Exception{
-        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
-        cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
-
-        Path path = Paths.get(this.pathPrivateKey);
-        byte[] bytes = Files.readAllBytes(path);
-
-        String privateKeyBase64 = new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
-        privateKeyBase64 = privateKeyBase64.replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "").trim();
-        privateKeyBase64 = privateKeyBase64.replaceAll("\\s+", "");
-
-        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyBase64);
-
-        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
-        PrivateKey privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
-
         byte[] data = new byte[Constants.TEST_ARRAY_SIZE];
         SecureRandom random = new SecureRandom();
         random.nextBytes(data);
@@ -64,17 +62,11 @@ public class Register {
         MessageDigest md = MessageDigest.getInstance(Constants.DIGEST_ALGO);
         byte[] hashedData = md.digest(data);
 
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
         byte[] digitalSignature = cipher.doFinal(hashedData);
 
-        Path certificatePath = Paths.get(this.pathCertificate);
-        byte[] certificateBytes = Files.readAllBytes(certificatePath);
-
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
-        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(certificateBytes));
-        PublicKey publicKey = certificate.getPublicKey();
-
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        cipher.init(Cipher.DECRYPT_MODE, certificateInfo.publicKey);
         byte[] decryptedData = cipher.doFinal(digitalSignature);
         boolean isVerified = java.util.Arrays.equals(hashedData, decryptedData);
 
