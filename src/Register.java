@@ -1,11 +1,14 @@
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -18,18 +21,28 @@ public class Register {
     public Group group;
     public String password;
     public String confirmPassword;
-    public DigitalCertificate digitalCertificate;
+    public CertificateInfo certificateInfo;
+    public Key privateKey;
+    public X509Certificate certificate;
 
-    private void validateKey() throws Exception{
+    private void fillPrivateKey() throws NoSuchAlgorithmException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(secretPhrase.getBytes());
 
         KeyGenerator keyGen = KeyGenerator.getInstance(Constants.KEY_GENERATOR_ALGO);
         keyGen.init(Constants.KEY_SIZE, rand);
-        Key key = keyGen.generateKey();
+        this.privateKey = keyGen.generateKey();
+    }
 
+    private void fillCertificate() throws FileNotFoundException, CertificateException {
+        FileInputStream fis = new FileInputStream(this.pathCertificate);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
+        this.certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
+    }
+
+    private void validateKey() throws Exception{
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
 
         Path path = Paths.get(this.pathPrivateKey);
         byte[] bytes = Files.readAllBytes(path);
@@ -78,6 +91,10 @@ public class Register {
             throw new PasswordMismatchException();
         }
 
+        if (!DatabaseManager.loginIsUnique(this.certificateInfo.email)){
+            throw new LoginNotUniqueException();
+        }
+
         char prev = password.charAt(0);
         for (int i = 1; i < password.length(); i++) {
             char curr = password.charAt(i);
@@ -100,9 +117,11 @@ public class Register {
 
     public void registerAdmin() throws Exception {
         this.fillForTest();
-        this.digitalCertificate = new DigitalCertificate(this.pathCertificate);
+        this.fillCertificate();
+        this.certificateInfo = new CertificateInfo(this.certificate);
+        this.fillPrivateKey();
         this.checkInfo();
-        // Save into the database
+        DatabaseManager.saveUser(this.certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
     public boolean validateAdmin(){

@@ -1,12 +1,12 @@
-import java.io.FileInputStream;
 import java.security.PublicKey;
-import java.security.cert.CertificateFactory;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 
-public class DigitalCertificate {
+public class CertificateInfo {
     public String version;
     public String serialNumber;
     public String validityPeriod;
@@ -16,11 +16,7 @@ public class DigitalCertificate {
     public String email;
     public PublicKey publicKey;
 
-    public DigitalCertificate(String certificateFilePath) throws Exception {
-        FileInputStream fis = new FileInputStream(certificateFilePath);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
-
+    public CertificateInfo(X509Certificate certificate) {
         // Extract certificate details
         this.version = String.valueOf(certificate.getVersion());
         this.serialNumber = certificate.getSerialNumber().toString();
@@ -37,7 +33,6 @@ public class DigitalCertificate {
         // Extract public key
         this.publicKey = certificate.getPublicKey();
 
-        fis.close();
     }
 
     private String extractCommonName(String name) {
