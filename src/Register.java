@@ -1,11 +1,15 @@
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 
 public class Register {
     public String pathCertificate;
@@ -16,12 +20,52 @@ public class Register {
     public String confirmPassword;
     public DigitalCertificate digitalCertificate;
 
-    private void validatePublicKey() throws Exception {
-        // Read the private key from the PEM file
-        FileInputStream privateKeyFile = new FileInputStream(this.pathPrivateKey);
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(privateKeyFile);
-        privateKeyFile.close();
+    private void validateKey() throws Exception{
+        SecureRandom rand = SecureRandom.getInstance("SHA1PRNG");
+        rand.setSeed(secretPhrase.getBytes());
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(256, rand);
+        Key key = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        Path path = Paths.get(this.pathPrivateKey);
+        byte[] bytes = Files.readAllBytes(path);
+
+        String chavePrivadaBase64 = new String(cipher.doFinal(bytes), "UTF8");
+        chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "").trim();
+        chavePrivadaBase64 = chavePrivadaBase64.replaceAll("\\s+", "");
+
+        byte[] chavePrivadaBytes = Base64.getDecoder().decode(chavePrivadaBase64);
+
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
+
+        byte[] data = new byte[4096];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(data);
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashedData = md.digest(data);
+
+        cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        byte[] digitalSignature = cipher.doFinal(hashedData);
+
+        Path certificatePath = Paths.get(this.pathCertificate);
+        byte[] certificateBytes = Files.readAllBytes(certificatePath);
+
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(certificateBytes));
+        PublicKey publicKey = certificate.getPublicKey();
+
+        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        byte[] decryptedData = cipher.doFinal(digitalSignature);
+        boolean isVerified = java.util.Arrays.equals(hashedData, decryptedData);
+
+        if (!isVerified){
+            throw new InvalidPrivateKeyException();
+        }
     }
 
     private void checkInfo() throws Exception, RepeatingCharactersException {
@@ -40,7 +84,7 @@ public class Register {
             }
             prev = curr;
         }
-        this.validatePublicKey();
+        this.validateKey();
     }
 
     private void fillForTest(){
@@ -56,6 +100,7 @@ public class Register {
         this.fillForTest();
         this.digitalCertificate = new DigitalCertificate(this.pathCertificate);
         this.checkInfo();
+        // Save into the database
         return;
     }
 
