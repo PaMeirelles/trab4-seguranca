@@ -1,16 +1,17 @@
 public class Main {
     public DatabaseManager databaseManager;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception, RepeatingCharactersException {
         Main main = new Main();
 
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
-
+        Register r = new Register();
         if(isFirstAccess){
-            Register.register_admin();
+            r.registerAdmin();
         }
         else{
-            if(!Register.validate_admin()){
+            if(!r.validateAdmin()){
+                //TODO
                 return;
             }
         }
