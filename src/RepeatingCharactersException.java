@@ -1,4 +1,4 @@
-public class RepeatingCharactersException extends Throwable {
-    public RepeatingCharactersException(String s) {
+public class RepeatingCharactersException extends Exception {
+    public RepeatingCharactersException() {
     }
 }
