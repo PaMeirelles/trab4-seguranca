@@ -1,5 +1,4 @@
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -23,14 +22,11 @@ public class CertificateInfo {
         this.validityPeriod = certificate.getNotBefore() + " to " + certificate.getNotAfter();
         this.signatureType = certificate.getSigAlgName();
 
-        // Extract issuer CN
         this.issuer = extractCommonName(certificate.getIssuerX500Principal().getName());
 
-        // Extract subject CN and E
         this.subjectFriendlyName = extractCommonName(certificate.getSubjectX500Principal().getName());
         this.email = extractEmail(certificate.getSubjectX500Principal().getName());
 
-        // Extract public key
         this.publicKey = certificate.getPublicKey();
 
     }

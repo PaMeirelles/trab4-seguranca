@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -100,7 +99,7 @@ public class DatabaseManager {
         statement.executeUpdate();
     }
 
-    public static void saveUser(String login, String password, Key privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException, ClassNotFoundException {
+    public static void saveUser(String login, String password, Key privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException {
         Connection connection = getConnection();
         int kid = saveKeys(privateKey, certificate, connection);
         String preparedPassword = preparePassword(password);
