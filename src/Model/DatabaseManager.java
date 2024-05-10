@@ -2,6 +2,7 @@ package Model;
 
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 
+import javax.crypto.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
@@ -76,7 +77,7 @@ public class DatabaseManager {
 
     }
 
-    public static PrivateKey retrieveprivateKey(String login) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] retrieveprivateKeyBytes(String login) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);
@@ -85,12 +86,18 @@ public class DatabaseManager {
 
         ResultSet resultSet = statement.executeQuery();
 
-        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
-        byte [] pkBytes = resultSet.getBytes("private_key");
-        return factory.generatePrivate(new PKCS8EncodedKeySpec(pkBytes));
+        return resultSet.getBytes("private_key");
     }
-    private static byte[] preparePrivateKey(PrivateKey privateKey) {
-        return privateKey.getEncoded();
+    private static byte[] preparePrivateKey(PrivateKey privateKey, String secretPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
+        rand.setSeed(secretPhrase.getBytes());
+
+        KeyGenerator keyGen = KeyGenerator.getInstance(Constants.KEY_GENERATOR_ALGO);
+        keyGen.init(Constants.KEY_SIZE, rand);
+        Key chave = keyGen.generateKey();
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        cipher.init(Cipher.ENCRYPT_MODE, chave);
+        return cipher.doFinal(privateKey.getEncoded());
     }
 
     private static int getGroupId(Group group){
@@ -103,12 +110,12 @@ public class DatabaseManager {
                 return -1;
         }    }
 
-    private static int saveKeys(PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, IOException {
+    private static int saveKeys(String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key) VALUES (?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
         String encodedCertificate = Base64.getEncoder().encodeToString(certificate.getEncoded());
 
-        statement.setBytes(2, preparePrivateKey(privateKey));
+        statement.setBytes(2, preparePrivateKey(privateKey, secretPhrase));
         statement.setString(1, encodedCertificate);
 
         statement.executeUpdate();
@@ -135,9 +142,9 @@ public class DatabaseManager {
         statement.executeUpdate();
     }
 
-    public static void saveUser(String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException {
+    public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Connection connection = getConnection();
-        int kid = saveKeys(privateKey, certificate, connection);
+        int kid = saveKeys(secretPhrase, privateKey, certificate, connection);
         String preparedPassword = preparePassword(password);
         saveUser(kid, login, preparedPassword, friendlyName, group, connection);
         connection.close();

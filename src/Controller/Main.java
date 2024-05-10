@@ -13,7 +13,7 @@ public class Main {
             r.registerAdmin();
         }
         else{
-            if(!r.validateAdmin("")){
+            if(!r.validateAdmin("admin")){
                 //TODO
                 Registration oi = new Registration();
                 return;

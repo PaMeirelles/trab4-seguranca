@@ -45,12 +45,7 @@ public class Register {
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
 
-
-        String chavePrivadaBase64 = new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
-        chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "").trim();
-        chavePrivadaBase64 = chavePrivadaBase64.replaceAll("\\s+", "");
-        byte[] chavePrivadaBytes = Base64.getDecoder().decode(chavePrivadaBase64);
+        byte[] chavePrivadaBytes = cipher.doFinal(bytes);
 
         KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
         privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
@@ -120,18 +115,17 @@ public class Register {
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.fillPrivateKey(retrievePrivateKey());
         this.checkInfo();
-        DatabaseManager.saveUser(this.certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
+        DatabaseManager.saveUser(secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
     public boolean validateAdmin(String secretPhrase) throws Exception {
         String admLogin = getAdmLogin();
         X509Certificate cert = DatabaseManager.retrieveCertificate(admLogin);
-        PrivateKey key = DatabaseManager.retrieveprivateKey(admLogin);
+        byte[] privateKeyBytes = DatabaseManager.retrieveprivateKeyBytes(admLogin);
         this.secretPhrase = secretPhrase;
         this.certificate = cert;
         this.certificateInfo = new CertificateInfo(this.certificate);
-        //fillPrivateKey(key.getEncoded());
-        this.privateKey = key;
+        fillPrivateKey(privateKeyBytes);
         return validateKey();
     }
 }
