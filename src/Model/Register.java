@@ -30,9 +30,25 @@ public class Register {
     public PrivateKey privateKey;
     public X509Certificate certificate;
 
+    public void fillInfo(String certPath, String keyPath, String secretPhrase, String group, String password, String confirmPassword) {
+        this.pathCertificate = certPath;
+        this.pathPrivateKey = keyPath;
+        this.secretPhrase = secretPhrase;
+        this.group = Group.valueOf(group.toUpperCase());
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+    }
     private byte[] retrievePrivateKey() throws IOException {
         Path path = Paths.get(pathPrivateKey);
         return Files.readAllBytes(path);
+    }
+
+    private byte[] trimKey(byte[] keyBytes){
+        String chavePrivadaBase64 = new String(keyBytes, StandardCharsets.UTF_8);
+        chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "").trim();
+        chavePrivadaBase64 = chavePrivadaBase64.replaceAll("\\s+", "");
+        return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
     private void fillPrivateKey(byte [] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
@@ -45,7 +61,7 @@ public class Register {
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
 
-        byte[] chavePrivadaBytes = cipher.doFinal(bytes);
+        byte[] chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
 
         KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
         privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
@@ -110,7 +126,6 @@ public class Register {
     }
 
     public void registerAdmin() throws Exception {
-        this.fillForTest();
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.fillPrivateKey(retrievePrivateKey());
