@@ -18,7 +18,7 @@ public class DatabaseManager {
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(Constants.CONNECTION_STRING);
     }
-    public static boolean loginIsUnique(String login) throws Exception {
+    public static boolean loginIsNotUnique(String login) throws Exception {
         String query = "SELECT COUNT(*) AS count FROM usuarios WHERE login = ?";
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);
@@ -30,10 +30,10 @@ public class DatabaseManager {
         if (resultSet.next()) {
             int count = resultSet.getInt("count");
             connection.close();
-            return count == 0;
+            return count != 0;
         }
         connection.close();
-        return false;
+        return true;
     }
     private static byte[] generateSalt() {
         SecureRandom random = new SecureRandom();
@@ -46,6 +46,18 @@ public class DatabaseManager {
         return OpenBSDBCrypt.generate(password.getBytes(), generateSalt(), Constants.COST_FACTOR);
       }
 
+    public static String retrievePassword(String login) throws SQLException {
+        String query = "SELECT password FROM usuarios WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+
+        statement.setString(1, login);
+
+        ResultSet resultSet = statement.executeQuery();
+        connection.close();
+        return resultSet.getNString("password");
+
+    }
     private static byte[] preparePrivateKey(Key privateKey) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 

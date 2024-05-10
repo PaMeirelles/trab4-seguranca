@@ -82,7 +82,7 @@ public class Register {
             throw new PasswordMismatchException();
         }
 
-        if (!DatabaseManager.loginIsUnique(this.certificateInfo.email)){
+        if (DatabaseManager.loginIsNotUnique(this.certificateInfo.email)){
             throw new LoginNotUniqueException();
         }
 
