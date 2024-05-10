@@ -3,16 +3,18 @@ package Model;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 
 import java.io.*;
-import java.security.Key;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.sql.*;
 import java.util.Base64;
 
 public class DatabaseManager {
     public static boolean isFirstAccess(){
         // TODO
-        return true;
+        return false;
     }
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(Constants.CONNECTION_STRING);
@@ -59,30 +61,36 @@ public class DatabaseManager {
     }
 
     public static X509Certificate retrieveCertificate(String login) throws SQLException, CertificateException {
-        String query = "SELECT certificate FROM usuarios WHERE login = ?";
+        String query = "SELECT digital_certificate FROM KeyByLogin WHERE login = ?";
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);
 
         statement.setString(1, login);
 
         ResultSet resultSet = statement.executeQuery();
-        connection.close();
         CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
-        byte[] certBytes = resultSet.getBytes(1);
+        byte[] certBytes = Base64.getDecoder().decode(resultSet.getString("digital_certificate"));
         ByteArrayInputStream fis = new ByteArrayInputStream(certBytes);
-
+        connection.close();
         return (X509Certificate) certificateFactory.generateCertificate(fis);
 
     }
-    private static byte[] preparePrivateKey(Key privateKey) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(privateKey);
-        objectOutputStream.flush();
-        objectOutputStream.close();
+    public static PrivateKey retrieveprivateKey(String login) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
 
-        return byteArrayOutputStream.toByteArray();
+        statement.setString(1, login);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
+        byte [] pkBytes = resultSet.getBytes("private_key");
+        return factory.generatePrivate(new PKCS8EncodedKeySpec(pkBytes));
+    }
+    private static byte[] preparePrivateKey(PrivateKey privateKey) {
+        return privateKey.getEncoded();
     }
 
     private static int getGroupId(Group group){
@@ -95,7 +103,7 @@ public class DatabaseManager {
                 return -1;
         }    }
 
-    private static int saveKeys(Key privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, IOException {
+    private static int saveKeys(PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, IOException {
         String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key) VALUES (?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
         String encodedCertificate = Base64.getEncoder().encodeToString(certificate.getEncoded());
@@ -127,7 +135,7 @@ public class DatabaseManager {
         statement.executeUpdate();
     }
 
-    public static void saveUser(String login, String password, Key privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException {
+    public static void saveUser(String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException {
         Connection connection = getConnection();
         int kid = saveKeys(privateKey, certificate, connection);
         String preparedPassword = preparePassword(password);
@@ -136,6 +144,7 @@ public class DatabaseManager {
     }
 
     public static String getAdmLogin(){
-        return "admin";
+        // TODO
+        return "admin@inf1416.puc-rio.br";
     }
 }

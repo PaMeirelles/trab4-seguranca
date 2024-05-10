@@ -3,6 +3,7 @@ package Controller;
 import Model.DatabaseManager;
 import Model.Register;
 import Model.RepeatingCharactersException;
+import View.Registration;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -14,6 +15,7 @@ public class Main {
         else{
             if(!r.validateAdmin("")){
                 //TODO
+                Registration oi = new Registration();
                 return;
             }
         }

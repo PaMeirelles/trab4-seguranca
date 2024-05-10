@@ -30,7 +30,12 @@ public class Register {
     public PrivateKey privateKey;
     public X509Certificate certificate;
 
-    private void fillPrivateKey() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+    private byte[] retrievePrivateKey() throws IOException {
+        Path path = Paths.get(pathPrivateKey);
+        return Files.readAllBytes(path);
+    }
+
+    private void fillPrivateKey(byte [] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(secretPhrase.getBytes());
 
@@ -39,8 +44,7 @@ public class Register {
         Key chave = keyGen.generateKey();
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
-        Path path = Paths.get(pathPrivateKey);
-        byte[] bytes = Files.readAllBytes(path);
+
 
         String chavePrivadaBase64 = new String(cipher.doFinal(bytes), StandardCharsets.UTF_8);
         chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
@@ -110,22 +114,24 @@ public class Register {
         this.confirmPassword = "05062024";
     }
 
-
-
     public void registerAdmin() throws Exception {
         this.fillForTest();
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
-        this.fillPrivateKey();
+        this.fillPrivateKey(retrievePrivateKey());
         this.checkInfo();
         DatabaseManager.saveUser(this.certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
     public boolean validateAdmin(String secretPhrase) throws Exception {
-        X509Certificate cert = DatabaseManager.retrieveCertificate(getAdmLogin());
+        String admLogin = getAdmLogin();
+        X509Certificate cert = DatabaseManager.retrieveCertificate(admLogin);
+        PrivateKey key = DatabaseManager.retrieveprivateKey(admLogin);
         this.secretPhrase = secretPhrase;
         this.certificate = cert;
-        fillPrivateKey();
+        this.certificateInfo = new CertificateInfo(this.certificate);
+        //fillPrivateKey(key.getEncoded());
+        this.privateKey = key;
         return validateKey();
     }
 }
