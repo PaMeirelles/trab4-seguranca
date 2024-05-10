@@ -1,3 +1,5 @@
+package Model;
+
 import javax.crypto.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,7 +14,10 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.sql.SQLException;
 import java.util.Base64;
+
+import static Model.DatabaseManager.getAdmLogin;
 
 public class Register {
     public String pathCertificate;
@@ -53,7 +58,7 @@ public class Register {
         this.certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
     }
 
-    private void validateKey() throws Exception{
+    private boolean validateKey() throws Exception{
         byte[] data = new byte[Constants.TEST_ARRAY_SIZE];
         SecureRandom random = new SecureRandom();
         random.nextBytes(data);
@@ -67,11 +72,8 @@ public class Register {
 
         cipher.init(Cipher.DECRYPT_MODE, certificateInfo.publicKey);
         byte[] decryptedData = cipher.doFinal(digitalSignature);
-        boolean isVerified = java.util.Arrays.equals(hashedData, decryptedData);
 
-        if (!isVerified){
-            throw new InvalidPrivateKeyException();
-        }
+        return java.util.Arrays.equals(hashedData, decryptedData);
     }
 
     private void checkInfo() throws Exception {
@@ -94,7 +96,9 @@ public class Register {
             }
             prev = curr;
         }
-        this.validateKey();
+        if(!this.validateKey()){
+            throw new InvalidPrivateKeyException();
+        }
     }
 
     private void fillForTest(){
@@ -106,6 +110,8 @@ public class Register {
         this.confirmPassword = "05062024";
     }
 
+
+
     public void registerAdmin() throws Exception {
         this.fillForTest();
         this.fillCertificate();
@@ -115,7 +121,11 @@ public class Register {
         DatabaseManager.saveUser(this.certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
-    public boolean validateAdmin(){
-        return true;
+    public boolean validateAdmin(String secretPhrase) throws Exception {
+        X509Certificate cert = DatabaseManager.retrieveCertificate(getAdmLogin());
+        this.secretPhrase = secretPhrase;
+        this.certificate = cert;
+        fillPrivateKey();
+        return validateKey();
     }
 }

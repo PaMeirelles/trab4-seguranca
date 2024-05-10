@@ -1,12 +1,11 @@
+package Model;
+
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
+import java.security.cert.*;
 import java.sql.*;
 import java.util.Base64;
 
@@ -56,6 +55,23 @@ public class DatabaseManager {
         ResultSet resultSet = statement.executeQuery();
         connection.close();
         return resultSet.getNString("password");
+
+    }
+
+    public static X509Certificate retrieveCertificate(String login) throws SQLException, CertificateException {
+        String query = "SELECT certificate FROM usuarios WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+
+        statement.setString(1, login);
+
+        ResultSet resultSet = statement.executeQuery();
+        connection.close();
+        CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
+        byte[] certBytes = resultSet.getBytes(1);
+        ByteArrayInputStream fis = new ByteArrayInputStream(certBytes);
+
+        return (X509Certificate) certificateFactory.generateCertificate(fis);
 
     }
     private static byte[] preparePrivateKey(Key privateKey) throws IOException {
@@ -117,5 +133,9 @@ public class DatabaseManager {
         String preparedPassword = preparePassword(password);
         saveUser(kid, login, preparedPassword, friendlyName, group, connection);
         connection.close();
+    }
+
+    public static String getAdmLogin(){
+        return "admin";
     }
 }

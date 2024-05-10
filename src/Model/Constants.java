@@ -1,3 +1,5 @@
+package Model;
+
 public class Constants {
     public static final String KEY_GENERATOR_ALGO = "AES";
     public static final Integer KEY_SIZE = 256;
