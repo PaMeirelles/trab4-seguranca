@@ -1,18 +1,9 @@
 package Model;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import javax.crypto.*;
+import java.io.*;
 import java.nio.file.Path;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
+import java.security.*;
 
 public class VaultHandler {
     private static String decodeAndRead(Cipher cipher, Key key, String folderName, String fileName) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
@@ -24,10 +15,12 @@ public class VaultHandler {
         fis.read(encryptedData);
         byte[] decryptedData = cipher.doFinal(encryptedData);
         fis.close();
+        FileOutputStream fos = new FileOutputStream("output.docx");
+        fos.write(decryptedData);
         return new String(decryptedData);
     }
 
-    public static boolean decryptIndex(String pathFolder, String secretPhrase, PrivateKey pk) throws Exception {
+    public static boolean decryptFile(String pathFolder, String secretPhrase, PrivateKey pk, String fileName) throws Exception {
         Register r = new Register();
 
         if (!r.validateAdmin(secretPhrase)) {
@@ -37,7 +30,7 @@ public class VaultHandler {
 
         cipher = Cipher.getInstance(Constants.KEY_ALGO); // Usar RSA para decifrar com a chave privada
 
-        String decryptedEnv = decodeAndRead(cipher, pk, pathFolder, "index.env");
+        String decryptedEnv = decodeAndRead(cipher, pk, pathFolder, fileName + ".env");
         System.out.println("Conteúdo do envelope do índice decifrado:");
         System.out.println(decryptedEnv);
 
@@ -50,14 +43,21 @@ public class VaultHandler {
 
         cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
-        String decryptedIndexContent = decodeAndRead(cipher, chave, pathFolder, "index.enc");
+        String decryptedIndexContent = decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
         System.out.println("Conteúdo do arquivo de índice decifrado:");
         System.out.println(decryptedIndexContent);
         return true;
     }
+
+    public static void writeToFile(String content, String pathFolder, String fileName) throws IOException {
+        File outputFile = new File(pathFolder, fileName);
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+            fos.write(content.getBytes());
+        }
+    }
     public static void main(String[] args) throws Exception {
         Register r = new Register();
         r.validateAdmin("admin");
-        decryptIndex("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin", r.privateKey);
+        decryptFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin",  r.privateKey, "XXYYZZ00");
     }
 }
