@@ -15,7 +15,7 @@ import java.util.Base64;
 public class DatabaseManager {
     public static boolean isFirstAccess(){
         // TODO
-        return true;
+        return false;
     }
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(Constants.CONNECTION_STRING);

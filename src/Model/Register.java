@@ -51,7 +51,7 @@ public class Register {
         return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
-    private void fillPrivateKey(byte [] bytes) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(secretPhrase.getBytes());
 
@@ -60,8 +60,13 @@ public class Register {
         Key chave = keyGen.generateKey();
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
-
-        byte[] chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
+        byte[] chavePrivadaBytes;
+        if(fromFile){
+            chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
+        }
+        else{
+            chavePrivadaBytes = cipher.doFinal(bytes);
+        }
 
         KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
         privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
@@ -128,7 +133,7 @@ public class Register {
     public void registerAdmin() throws Exception {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
-        this.fillPrivateKey(retrievePrivateKey());
+        this.fillPrivateKey(retrievePrivateKey(), true);
         this.checkInfo();
         DatabaseManager.saveUser(secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
@@ -140,7 +145,7 @@ public class Register {
         this.secretPhrase = secretPhrase;
         this.certificate = cert;
         this.certificateInfo = new CertificateInfo(this.certificate);
-        fillPrivateKey(privateKeyBytes);
+        fillPrivateKey(privateKeyBytes, false);
         return validateKey();
     }
 }

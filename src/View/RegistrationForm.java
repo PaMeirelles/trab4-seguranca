@@ -15,11 +15,7 @@ public class RegistrationForm extends JFrame {
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
 
-    private RegistrationCallback callback;
-
     public RegistrationForm(RegistrationCallback callback) {
-        this.callback = callback;
-
         setTitle("Cadastro de Usuário");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
