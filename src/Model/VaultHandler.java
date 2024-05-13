@@ -109,8 +109,9 @@ public class VaultHandler {
 
     public static void main(String[] args) throws Exception {
         Register r = new Register();
-        r.validateAdmin("admin");
-        List<SecretFile> files = decodeIndex("admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
-        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(0), r.privateKey);
+        //r.fillInfo("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-x509.crt", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-pkcs8-aes.pem", "user01", "USER", "13052024", "13052024");
+        r.validatesecretPhrase("user01@inf1416.puc-rio.br", "user01");
+        List<SecretFile> files = decodeIndex( "admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
+        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "user01@inf1416.puc-rio.br", files.get(1), r.privateKey);
     }
 }
