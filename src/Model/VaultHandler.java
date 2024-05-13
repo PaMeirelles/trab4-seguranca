@@ -3,9 +3,12 @@ package Model;
 import javax.crypto.*;
 import java.io.*;
 import java.security.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class VaultHandler {
-    private static String decodeAndRead(Cipher cipher, Key key, String folderName, String fileName) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
+    private static byte[] decodeAndRead(Cipher cipher, Key key, String folderName, String fileName) throws InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
         String encryptedIndexPath = folderName + File.separator + fileName;
         File encryptedIndexFile = new File(encryptedIndexPath);
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -14,24 +17,15 @@ public class VaultHandler {
         fis.read(encryptedData);
         byte[] decryptedData = cipher.doFinal(encryptedData);
         fis.close();
-        FileOutputStream fos = new FileOutputStream("output.docx");
-        fos.write(decryptedData);
-        return new String(decryptedData);
+        return decryptedData;
     }
 
-    public static boolean decryptFile(String pathFolder, String secretPhrase, PrivateKey pk, String fileName) throws Exception {
-        Register r = new Register();
-
-        if (!r.validateAdmin(secretPhrase)) {
-            return false;
-        }
+    private static byte[] decryptFile(String pathFolder, PrivateKey pk, String fileName) throws Exception {
         Cipher cipher;
 
-        cipher = Cipher.getInstance(Constants.KEY_ALGO); // Usar RSA para decifrar com a chave privada
+        cipher = Cipher.getInstance(Constants.KEY_ALGO);
 
-        String decryptedEnv = decodeAndRead(cipher, pk, pathFolder, fileName + ".env");
-        System.out.println("Conteúdo do envelope do índice decifrado:");
-        System.out.println(decryptedEnv);
+        String decryptedEnv = new String(decodeAndRead(cipher, pk, pathFolder, fileName + ".env"));
 
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(decryptedEnv.getBytes());
@@ -42,10 +36,8 @@ public class VaultHandler {
 
         cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
-        String decryptedIndexContent = decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
-        System.out.println("Conteúdo do arquivo de índice decifrado:");
-        System.out.println(decryptedIndexContent);
-        return true;
+        return decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
+
     }
 
     public static void writeToFile(String content, String pathFolder, String fileName) throws IOException {
@@ -54,9 +46,59 @@ public class VaultHandler {
             fos.write(content.getBytes());
         }
     }
-    public static void main(String[] args) throws Exception {
+
+    private static boolean checkIntegrity(String folder, String name, Key key){
+        // TODO
+        return true;
+    }
+
+    private static List<SecretFile> parseSecretFiles(String input) {
+        List<SecretFile> secretFiles = new ArrayList<>();
+        String[] lines = input.split("\n");
+
+        for (String line : lines) {
+            String[] parts = line.split(" ");
+
+            // Ensure the line has the correct number of parts
+            if (parts.length != 4) {
+                // Handle invalid line format, such as logging an error or throwing an exception
+                continue; // Skip to the next line
+            }
+
+            // Create a new SecretFile object and add it to the list
+            SecretFile secretFile = new SecretFile();
+            secretFile.fakeName = parts[0];
+            secretFile.trueName = parts[1];
+            secretFile.owner = parts[2];
+            Group g;
+            if (Objects.equals(parts[3], "administrator")){
+                g = Group.ADMIN;
+            }
+            else {
+                // TODO: Tratar o caso de nenhum dos dois
+                g = Group.USER;
+            }
+            secretFile.group = g; // Assuming Group constructor takes the group name
+            secretFiles.add(secretFile);
+        }
+
+        return secretFiles;
+    }
+
+    public static List<SecretFile> decodeIndex(String secretPhrase, String folderPath) throws Exception {
+        // TODO: Tratar adequadamente os casos de erro
         Register r = new Register();
-        r.validateAdmin("admin");
-        decryptFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin",  r.privateKey, "XXYYZZ00");
+        boolean phraseValid = r.validateAdmin(secretPhrase);
+        boolean integrity = checkIntegrity(folderPath, "index.asd", r.privateKey);
+        if (!phraseValid || !integrity){
+            throw new Exception();
+        }
+        byte[] indexInfo = decryptFile(folderPath, r.privateKey, "index");
+        return parseSecretFiles(new String(indexInfo));
+    }
+
+    public static void main(String[] args) throws Exception {
+       List<SecretFile> oi = decodeIndex("admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
+        int oi1 = 0;
     }
 }
