@@ -6,6 +6,7 @@ import View.AdminValidation;
 import View.Login;
 import View.RegistrationForm;
 import javax.swing.*;
+import java.util.List;
 
 public class Main {
     public static String frase_secreta = null;
@@ -22,6 +23,7 @@ public class Main {
         } else {
             startAuthenticationProcess();
             startLoginProcess();
+            startPasswordProcess();
 
         }
     }
@@ -57,6 +59,22 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    private static void startPasswordProcess() {
+        try {
+            String passwords = null;
+            while (true) {
+                passwords = Login.collectPassword();
+                boolean passwordCorrect = true;
+                if (passwordCorrect) {
+                    break;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
