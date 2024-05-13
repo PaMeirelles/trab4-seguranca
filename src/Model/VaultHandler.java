@@ -40,10 +40,10 @@ public class VaultHandler {
 
     }
 
-    public static void writeToFile(String content, String pathFolder, String fileName) throws IOException {
+    public static void writeToFile(byte[] content, String pathFolder, String fileName) throws IOException {
         File outputFile = new File(pathFolder, fileName);
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            fos.write(content.getBytes());
+            fos.write(content);
         }
     }
 
@@ -97,8 +97,20 @@ public class VaultHandler {
         return parseSecretFiles(new String(indexInfo));
     }
 
+    public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey key) throws Exception {
+        boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", key);
+        // TODO
+        if(!Objects.equals(loggedUser, sf.owner) || !integrity){
+            throw new Exception();
+        }
+        byte[] content = decryptFile(pathFolder, key, sf.fakeName);
+        writeToFile(content, pathFolder, sf.trueName);
+    }
+
     public static void main(String[] args) throws Exception {
-       List<SecretFile> oi = decodeIndex("admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
-        int oi1 = 0;
+        Register r = new Register();
+        r.validateAdmin("admin");
+        List<SecretFile> files = decodeIndex("admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
+        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(0), r.privateKey);
     }
 }
