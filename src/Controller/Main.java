@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.DatabaseManager;
+import Model.LoginModel;
 import Model.Register;
 import View.AdminValidation;
 import View.Login;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class Main {
     public static String frase_secreta = null;
-
+    public static String login = null;
     public static void main(String[] args) throws Exception {
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
         Register r = new Register();
@@ -44,18 +45,18 @@ public class Main {
     }
     private static String startLoginProcess() {
         try {
-            String login = null;
+            String login;
             while (true) {
-                login = Login.login();
-                boolean loginExists = DatabaseManager.loginIsNotUnique(login);
+                Main.login = Login.login();
+                boolean loginExists = LoginModel.loginStep1(Main.login);
                 if (loginExists) {
-                    System.out.println("Login aceito: " + login);
+                    System.out.println("Login aceito: " + Main.login);
                     break;
                 } else {
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
             }
-            return login;
+            return Main.login;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -63,14 +64,14 @@ public class Main {
     }
     private static void startPasswordProcess() {
         try {
-            String passwords = null;
+            List<String> passwords = null;
             while (true) {
                 passwords = Login.collectPassword();
-                boolean passwordCorrect = true;
+                boolean passwordCorrect = LoginModel.loginStep2(Main.login, passwords);
                 if (passwordCorrect) {
                     break;
                 } else {
-                    JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
+                    JOptionPane.showMessageDialog(null, "Senha incorreta. Tente novamente.");
                 }
             }
         } catch (Exception e) {

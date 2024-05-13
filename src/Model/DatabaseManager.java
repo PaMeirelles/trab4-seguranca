@@ -46,7 +46,11 @@ public class DatabaseManager {
 
     private static String preparePassword(String password){
         return OpenBSDBCrypt.generate(password.getBytes(), generateSalt(), Constants.COST_FACTOR);
-      }
+  }
+
+  public static boolean checkPassword(String pass, String dbPass){
+        return OpenBSDBCrypt.checkPassword(dbPass, pass.getBytes());
+  }
 
     public static String retrievePassword(String login) throws SQLException {
         String query = "SELECT password FROM usuarios WHERE login = ?";
@@ -56,8 +60,9 @@ public class DatabaseManager {
         statement.setString(1, login);
 
         ResultSet resultSet = statement.executeQuery();
+        String password = resultSet.getString("password");
         connection.close();
-        return resultSet.getNString("password");
+        return password;
 
     }
 
@@ -153,5 +158,11 @@ public class DatabaseManager {
     public static String getAdmLogin(){
         // TODO
         return "admin@inf1416.puc-rio.br";
+    }
+    public static void main(String[] args){
+        String pass = "06052024";
+        String hashed = "$2y$12$KqTNxqa/2v5rN83jq6DBWekOnaG5ufjw3H81mbbuKVwNoxfo410TO";
+        boolean check = checkPassword(pass, hashed);
+        System.out.println(check);
     }
 }

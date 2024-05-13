@@ -1,6 +1,8 @@
 package View;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,19 +48,22 @@ public class Login extends JFrame {
             return null;
         }
     }
-    public static String collectPassword() {
+    public static List<String> collectPassword() {
+        final List<String>[] possiblePasswords = new List[]{new ArrayList<>()}; // Initialize an empty ArrayList
+        possiblePasswords[0].add("");
+
+        List<String> buffer = new ArrayList<>(); // Initialize an empty ArrayList
+
         JFrame frame = new JFrame("Virtual Keyboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTextField passwordField = new JTextField(20);
         passwordField.setEditable(false);
 
-        JPanel keyboardPanel = new JPanel(new GridLayout(4, 3));
+        JPanel keyboardPanel = new JPanel(new GridLayout(2, 5));
         String[] buttonLabels = {
-                "1", "2", "3",
-                "4", "5", "6",
-                "7", "8", "9",
-                "Backspace", "0", "Enter"
+                "0-1", "2-3", "4-5", "6-7", "8-9",
+                "Clear", "Enter"
         };
 
         for (String label : buttonLabels) {
@@ -67,15 +72,20 @@ public class Login extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     String command = e.getActionCommand();
-                    if (command.equals("Backspace")) {
-                        String text = passwordField.getText();
-                        if (!text.isEmpty()) {
-                            passwordField.setText(text.substring(0, text.length() - 1));
-                        }
+                    if (command.equals("Clear")) {
+                        possiblePasswords[0].clear();
+
                     } else if (command.equals("Enter")) {
                         frame.dispose(); // Close the window when Enter is pressed
                     } else {
-                        passwordField.setText(passwordField.getText() + command);
+                        passwordField.setText(passwordField.getText() + '*');
+                        buffer.clear();
+                        for(String password : possiblePasswords[0]){
+                            buffer.add(password + command.charAt(0));
+                            buffer.add(password + command.charAt(2));
+                        }
+                        possiblePasswords[0].clear();
+                        possiblePasswords[0].addAll(buffer);
                     }
                 }
             });
@@ -97,7 +107,7 @@ public class Login extends JFrame {
             }
         }
 
-        return passwordField.getText();
+        return possiblePasswords[0];
     }
 }
 

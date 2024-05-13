@@ -126,8 +126,8 @@ public class Register {
         this.pathPrivateKey = "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\admin-pkcs8-aes.pem";
         this.secretPhrase = "admin";
         this.group = Group.ADMIN;
-        this.password = "05062024";
-        this.confirmPassword = "05062024";
+        this.password = "06052024";
+        this.confirmPassword = "06052024";
     }
 
     public void registerAdmin() throws Exception {
