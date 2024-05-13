@@ -4,33 +4,47 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
 public class Login extends JFrame {
-    public Login(Consumer<String> submitFunction) {
-        JFrame frame = new JFrame("Login");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 150);
-        frame.setLayout(new FlowLayout());
-
-        JLabel label = new JLabel("Insira o login:");
-        frame.add(label);
-
+    public static String login() {
+        JDialog dialog = new JDialog((Frame) null, "Login", true);
         JTextField textField = new JTextField(20);
-        frame.add(textField);
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("Cancelar");
 
-        JButton button = new JButton("Submit");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String inputText = textField.getText();
-                submitFunction.accept(inputText);
-                frame.dispose();
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(new JLabel("Digite seu login:"));
+        panel.add(textField);
+        panel.add(okButton);
+        panel.add(cancelButton);
+
+        dialog.getContentPane().add(panel);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+
+        okButton.setEnabled(false);
+
+        textField.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                okButton.setEnabled(!textField.getText().trim().isEmpty());
             }
         });
-        frame.add(button);
 
-        frame.setVisible(true);
+        okButton.addActionListener(e -> dialog.dispose());
+        cancelButton.addActionListener(e -> System.exit(0));
+
+        dialog.setVisible(true);
+
+        if (!textField.getText().trim().isEmpty()) {
+            return textField.getText().trim();
+        } else {
+            System.exit(0);
+            return null;
+        }
     }
 }
 
