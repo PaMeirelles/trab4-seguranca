@@ -7,8 +7,6 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.sql.*;
 import java.util.Base64;
 
@@ -82,7 +80,7 @@ public class DatabaseManager {
 
     }
 
-    public static byte[] retrieveprivateKeyBytes(String login) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] retrieveprivateKeyBytes(String login) throws SQLException {
         String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);
@@ -115,7 +113,7 @@ public class DatabaseManager {
                 return -1;
         }    }
 
-    private static int saveKeys(String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    private static int saveKeys(String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key) VALUES (?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
         String encodedCertificate = Base64.getEncoder().encodeToString(certificate.getEncoded());
@@ -147,7 +145,7 @@ public class DatabaseManager {
         statement.executeUpdate();
     }
 
-    public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Connection connection = getConnection();
         int kid = saveKeys(secretPhrase, privateKey, certificate, connection);
         String preparedPassword = preparePassword(password);

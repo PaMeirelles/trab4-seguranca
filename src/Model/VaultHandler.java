@@ -2,7 +2,6 @@ package Model;
 
 import javax.crypto.*;
 import java.io.*;
-import java.nio.file.Path;
 import java.security.*;
 
 public class VaultHandler {
