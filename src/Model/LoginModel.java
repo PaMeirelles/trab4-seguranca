@@ -79,8 +79,9 @@ public class LoginModel {
     }
 
     public static void main(String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        String code = calculateCode("NXV37JUCLJFU7AO5NTCJ23Y5SJKQQIP4VUTCJQDF3K4BVMFWQ7QQ====", getCurrentEpochInterval());
-        System.out.println(code);
+        String key = "NXV37JUCLJFU7AO5NTCJ23Y5SJKQQIP4VUTCJQDF3K4BVMFWQ7QQ====";
+        String digits = "339850";
+        System.out.println(loginStep3(key, digits));
     }
 
 }
