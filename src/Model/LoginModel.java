@@ -1,10 +1,8 @@
 package Model;
 
-import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -55,7 +53,7 @@ public class LoginModel {
         return String.format("%06d", truncatedHash);
     }
 
-    private static String calculateCode(String userKeyBase32, long interval) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    private static String calculateCode(String userKeyBase32, long interval) throws  NoSuchAlgorithmException, InvalidKeyException {
         String base32Alphabet = Base32.Alphabet.BASE32;
         boolean usePadding = true;
         boolean useLowercase = false;
@@ -73,9 +71,14 @@ public class LoginModel {
         long currentInterval = getCurrentEpochInterval();
         long pastInterval = getCurrentEpochInterval() - 1;
         long nextInterval = getCurrentEpochInterval() + 1;
-        return Objects.equals(calculateCode(userKeyBase32, currentInterval), digits) ||
-                Objects.equals(calculateCode(userKeyBase32, pastInterval), digits) ||
-                Objects.equals(calculateCode(userKeyBase32, nextInterval), digits);
+
+        String code1 = calculateCode(userKeyBase32, currentInterval);
+        String code2 = calculateCode(userKeyBase32, pastInterval);
+        String code3 = calculateCode(userKeyBase32, nextInterval);
+
+        return Objects.equals(code1, digits) ||
+                Objects.equals(code2, digits) ||
+                Objects.equals(code3, digits);
     }
 
     public static void main(String [] args) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {

@@ -25,7 +25,7 @@ public class Main {
             startAuthenticationProcess();
             startLoginProcess();
             startPasswordProcess();
-
+            startTotpProcess();
         }
     }
     private static void startAuthenticationProcess() {
@@ -43,7 +43,7 @@ public class Main {
             e.printStackTrace();
         }
     }
-    private static String startLoginProcess() {
+    private static void startLoginProcess() {
         try {
             String login;
             while (true) {
@@ -56,10 +56,8 @@ public class Main {
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
             }
-            return Main.login;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
     }
     private static void startPasswordProcess() {
@@ -72,6 +70,23 @@ public class Main {
                     break;
                 } else {
                     JOptionPane.showMessageDialog(null, "Senha incorreta. Tente novamente.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void startTotpProcess() {
+        try {
+            String totpCode;
+            while (true) {
+                totpCode = Login.collectTOTPCode();
+                boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login), totpCode);
+                if (codeCorrect) {
+                    break;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Código incorreto. Tente novamente.");
                 }
             }
         } catch (Exception e) {

@@ -157,6 +157,12 @@ public class DatabaseManager {
         // TODO
         return "admin@inf1416.puc-rio.br";
     }
+
+    public static String getUserTotpKey(String login){
+        // TODO
+        return "NXV37JUCLJFU7AO5NTCJ23Y5SJKQQIP4VUTCJQDF3K4BVMFWQ7QQ====";
+    }
+
     public static void main(String[] args){
         String pass = "06052024";
         String hashed = "$2y$12$KqTNxqa/2v5rN83jq6DBWekOnaG5ufjw3H81mbbuKVwNoxfo410TO";
