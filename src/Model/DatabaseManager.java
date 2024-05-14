@@ -13,12 +13,12 @@ import java.util.Base64;
 public class DatabaseManager {
     public static boolean isFirstAccess(){
         // TODO
-        return false;
+        return true;
     }
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(Constants.CONNECTION_STRING);
     }
-    public static boolean loginIsNotUnique(String login) throws Exception {
+    public static boolean loginIsNotUnique(String login) throws SQLException {
         String query = "SELECT COUNT(*) AS count FROM usuarios WHERE login = ?";
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(query);

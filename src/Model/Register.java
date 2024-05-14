@@ -16,6 +16,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -91,7 +92,7 @@ public class Register {
         return data;
     }
 
-    private boolean validateKey() throws Exception{
+    private boolean validateKey() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] data = genRandomBytes(Constants.TEST_ARRAY_SIZE);
 
         MessageDigest md = MessageDigest.getInstance(Constants.DIGEST_ALGO);
@@ -107,7 +108,7 @@ public class Register {
         return Arrays.equals(hashedData, decryptedData);
     }
 
-    private void checkInfo() throws Exception {
+    private void checkInfo() throws InvalidPasswordFormatException, LoginNotUniqueException, PasswordMismatchException, RepeatingCharactersException, InvalidPrivateKeyException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         if (!password.matches("^[0-9]{8,10}$")) {
             throw new InvalidPasswordFormatException();
         }

@@ -67,7 +67,7 @@ public class LoginModel {
         return extractCodeFromHash(hash);
     }
 
-    public static boolean loginStep3(String userKeyBase32, String digits) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public static boolean loginStep3(String userKeyBase32, String digits) throws NoSuchAlgorithmException, InvalidKeyException {
         long currentInterval = getCurrentEpochInterval();
         long pastInterval = getCurrentEpochInterval() - 1;
         long nextInterval = getCurrentEpochInterval() + 1;
