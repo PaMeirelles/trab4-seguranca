@@ -31,20 +31,20 @@ public class Main {
         }
     }
     private static void startAuthenticationProcess() {
+        frase_secreta = AdminValidation.secretPhraseInput();
+
+        Register r = new Register();
         try {
-            while (true) {
-                if (frase_secreta == null) {
-                    frase_secreta = AdminValidation.secretPhraseInput();
-                }
-                Register r = new Register();
-                if (r.validateAdmin(frase_secreta)){
-                    break;
-                }
+            if (!r.validateAdmin(frase_secreta)){
+                JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
+                System.exit(1);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
+            System.exit(1);
         }
     }
+
     private static void startLoginProcess() {
         try {
             String login;
