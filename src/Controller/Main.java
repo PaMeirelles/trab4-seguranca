@@ -5,6 +5,7 @@ import Model.LoginModel;
 import Model.Register;
 import View.AdminValidation;
 import View.Login;
+import View.MainMenu;
 import View.RegistrationForm;
 import javax.swing.*;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Main {
             startLoginProcess();
             startPasswordProcess();
             startTotpProcess();
+            MainMenu.createAndShowGUI();
         }
     }
     private static void startAuthenticationProcess() {
