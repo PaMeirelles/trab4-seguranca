@@ -13,4 +13,6 @@ public class Constants {
     public static final Integer SALT_LENGTH = 16;
     public static final Integer COST_FACTOR = 12;
     public static final Integer TOTP_SIZE = 20;
+    public static final long INTERVAL_IN_MILISSECONDS = 30000;
+    public static final String HMACSHA1 = "HmacSHA1";
 }
