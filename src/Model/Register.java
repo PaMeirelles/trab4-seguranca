@@ -1,5 +1,7 @@
 package Model;
 
+import org.bouncycastle.util.encoders.Base32;
+
 import javax.crypto.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +16,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 import static Model.DatabaseManager.getAdmLogin;
@@ -50,13 +53,17 @@ public class Register {
         return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
-    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+    private Key genKey(String seed) throws NoSuchAlgorithmException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
-        rand.setSeed(secretPhrase.getBytes());
+        rand.setSeed(seed.getBytes());
 
         KeyGenerator keyGen = KeyGenerator.getInstance(Constants.KEY_GENERATOR_ALGO);
         keyGen.init(Constants.KEY_SIZE, rand);
-        Key chave = keyGen.generateKey();
+        return keyGen.generateKey();
+    }
+
+    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+        Key chave = genKey(secretPhrase);
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.DECRYPT_MODE, chave);
         byte[] chavePrivadaBytes;
@@ -77,10 +84,15 @@ public class Register {
         this.certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
     }
 
-    private boolean validateKey() throws Exception{
-        byte[] data = new byte[Constants.TEST_ARRAY_SIZE];
+    private byte[] genRandomBytes(int numBytes){
+        byte[] data = new byte[numBytes];
         SecureRandom random = new SecureRandom();
         random.nextBytes(data);
+        return data;
+    }
+
+    private boolean validateKey() throws Exception{
+        byte[] data = genRandomBytes(Constants.TEST_ARRAY_SIZE);
 
         MessageDigest md = MessageDigest.getInstance(Constants.DIGEST_ALGO);
         byte[] hashedData = md.digest(data);
@@ -92,7 +104,7 @@ public class Register {
         cipher.init(Cipher.DECRYPT_MODE, certificateInfo.publicKey);
         byte[] decryptedData = cipher.doFinal(digitalSignature);
 
-        return java.util.Arrays.equals(hashedData, decryptedData);
+        return Arrays.equals(hashedData, decryptedData);
     }
 
     private void checkInfo() throws Exception {
@@ -129,6 +141,15 @@ public class Register {
         this.confirmPassword = "06052024";
     }
 
+    private String generateTotpKey() throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
+        byte[] randomBytes = genRandomBytes(Constants.TOTP_SIZE);
+        Key chave = genKey(password);
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
+        cipher.init(Cipher.ENCRYPT_MODE, chave);
+        byte[] encryptedBytes = cipher.doFinal(randomBytes);
+        return new String(Base32.encode(encryptedBytes));
+    }
+
     public void registerAdmin() throws Exception {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
@@ -137,14 +158,24 @@ public class Register {
         DatabaseManager.saveUser(secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
-    public boolean validateAdmin(String secretPhrase) throws Exception {
-        String admLogin = getAdmLogin();
-        X509Certificate cert = DatabaseManager.retrieveCertificate(admLogin);
-        byte[] privateKeyBytes = DatabaseManager.retrieveprivateKeyBytes(admLogin);
+    public boolean validatesecretPhrase(String login, String secretPhrase) throws Exception {
+        X509Certificate cert = DatabaseManager.retrieveCertificate(login);
+        byte[] privateKeyBytes = DatabaseManager.retrieveprivateKeyBytes(login);
         this.secretPhrase = secretPhrase;
         this.certificate = cert;
         this.certificateInfo = new CertificateInfo(this.certificate);
         fillPrivateKey(privateKeyBytes, false);
         return validateKey();
+    }
+
+    public boolean validateAdmin(String secretPhrase) throws Exception{
+        return validatesecretPhrase(getAdmLogin(), secretPhrase);
+    }
+
+    public static void main(String[] args) throws IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Register r = new Register();
+        r.fillForTest();
+        String oi = r.generateTotpKey();
+        System.out.println(oi);
     }
 }
