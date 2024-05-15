@@ -116,8 +116,8 @@ public class DatabaseManager {
                 connection.close();
                 return false; // If it was NULL, return false
             }
-            connection.close();
             long currentTime = System.currentTimeMillis();
+            connection.close();
             return blockedUntil > currentTime; // Check if blockedUntil is in the future
         }
         connection.close();
@@ -133,8 +133,10 @@ public class DatabaseManager {
         statement.setString(1, login);
 
         ResultSet resultSet = statement.executeQuery();
+        byte[] bytes = resultSet.getBytes("private_key");
+        connection.close();
 
-        return resultSet.getBytes("private_key");
+        return bytes;
     }
     private static byte[] preparePrivateKey(PrivateKey privateKey, String secretPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
@@ -173,7 +175,7 @@ public class DatabaseManager {
         if (generatedKeys.next()) {
             generatedKid = generatedKeys.getInt(1);
         }
-
+        connection.close();
         return generatedKid;
     }
 
@@ -188,6 +190,7 @@ public class DatabaseManager {
         statement.setString(5, friendlyName);
 
         statement.executeUpdate();
+        connection.close();
     }
 
     public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
