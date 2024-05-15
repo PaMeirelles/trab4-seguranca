@@ -11,8 +11,17 @@ import java.sql.*;
 import java.util.Base64;
 
 public class DatabaseManager {
-    public static boolean isFirstAccess(){
-        // TODO
+    public static boolean isFirstAccess() throws SQLException {
+        Connection conn = getConnection();
+        String query = "SELECT COUNT(*) AS count FROM usuarios";
+        PreparedStatement statement = conn.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            int count = resultSet.getInt("count");
+            conn.close();
+            return count == 0;
+        }
+        conn.close();
         return true;
     }
     private static Connection getConnection() throws SQLException {
@@ -163,10 +172,8 @@ public class DatabaseManager {
         return "NXV37JUCLJFU7AO5NTCJ23Y5SJKQQIP4VUTCJQDF3K4BVMFWQ7QQ====";
     }
 
-    public static void main(String[] args){
-        String pass = "06052024";
-        String hashed = "$2y$12$KqTNxqa/2v5rN83jq6DBWekOnaG5ufjw3H81mbbuKVwNoxfo410TO";
-        boolean check = checkPassword(pass, hashed);
-        System.out.println(check);
+    public static void main(String[] args) throws Exception{
+        boolean fa = isFirstAccess();
+        System.out.println(fa);
     }
 }
