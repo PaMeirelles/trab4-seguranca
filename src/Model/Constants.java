@@ -15,4 +15,5 @@ public class Constants {
     public static final Integer TOTP_SIZE = 20;
     public static final long INTERVAL_IN_MILISSECONDS = 30000;
     public static final String HMACSHA1 = "HmacSHA1";
+    public static final long BLOCK_TIME = 1000 * 60 * 2;
 }

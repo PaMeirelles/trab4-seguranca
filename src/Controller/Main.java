@@ -48,7 +48,7 @@ public class Main {
 
     private static void startLoginProcess() {
         try {
-            String login;
+            int failedAttempts = 0;
             while (true) {
                 Main.login = Login.login();
                 boolean loginExists = LoginModel.loginStep1(Main.login);
