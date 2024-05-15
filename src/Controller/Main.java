@@ -96,14 +96,24 @@ public class Main {
 
     private static void startTotpProcess() {
         try {
+            int attemptsRemaining = 3;
             String totpCode;
-            while (true) {
+            while (attemptsRemaining > 0) {
                 totpCode = Login.collectTOTPCode();
                 boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login), totpCode);
-                if (codeCorrect) {
+                if(codeCorrect){
                     break;
-                } else {
-                    JOptionPane.showMessageDialog(null, "Código incorreto. Tente novamente.");
+                }
+                else {
+                    attemptsRemaining -= 1;
+                    if (attemptsRemaining == 0) {
+                        DatabaseManager.blockUser(login);
+                        // TODO: Redirecionar para a tela de login
+                        JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
+                        System.exit(0);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Código incorreto. Tentativas restantes: " + attemptsRemaining);
+                    }
                 }
             }
         } catch (Exception e) {
