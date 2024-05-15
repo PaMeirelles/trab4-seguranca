@@ -8,12 +8,13 @@ import View.Login;
 import View.MainMenu;
 import View.RegistrationForm;
 import javax.swing.*;
+import java.sql.SQLException;
 import java.util.List;
 
 public class Main {
     public static String frase_secreta = null;
     public static String login = null;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
         Register r = new Register();
 
