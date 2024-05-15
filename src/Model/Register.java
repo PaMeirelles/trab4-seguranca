@@ -151,7 +151,7 @@ public class Register {
         return new String(Base32.encode(encryptedBytes));
     }
 
-    public void registerAdmin() throws Exception {
+    public void registerUser() throws Exception {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.fillPrivateKey(retrievePrivateKey(), true);

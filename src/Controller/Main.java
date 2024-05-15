@@ -21,7 +21,7 @@ public class Main {
         if (isFirstAccess) {
             new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
                 r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerAdmin();
+                r.registerUser();
             });
         } else {
             startAuthenticationProcess();

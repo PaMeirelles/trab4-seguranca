@@ -20,7 +20,7 @@ public class MainMenu {
             Register r = new Register();
             new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
                 r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerAdmin();
+                r.registerUser();
             });
         });
 
