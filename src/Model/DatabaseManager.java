@@ -89,6 +89,30 @@ public class DatabaseManager {
 
     }
 
+    public static boolean userIsBlocked(String login) throws SQLException {
+        String query = "SELECT blocked_until FROM usuarios WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+
+        statement.setString(1, login);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) { // Move the cursor to the first row
+            long blockedUntil = resultSet.getLong("blocked_until");
+
+            if (resultSet.wasNull()) { // Check if the value was NULL
+                return false; // If it was NULL, return false
+            }
+
+            long currentTime = System.currentTimeMillis();
+            return blockedUntil > currentTime; // Check if blockedUntil is in the future
+        }
+
+        return false; // Return false if no rows were found for the given login
+    }
+
+
     public static byte[] retrieveprivateKeyBytes(String login) throws SQLException {
         String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
         Connection connection = getConnection();
@@ -173,7 +197,8 @@ public class DatabaseManager {
     }
 
     public static void main(String[] args) throws Exception{
-        boolean fa = isFirstAccess();
-        System.out.println(fa);
+        String login = "admin@inf1416.puc-rio.br";
+        boolean isBlocked = userIsBlocked(login);
+        System.out.println(isBlocked);
     }
 }
