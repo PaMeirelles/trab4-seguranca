@@ -9,6 +9,7 @@ import View.MainMenu;
 import View.RegistrationForm;
 import javax.swing.*;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -48,13 +49,16 @@ public class Main {
 
     private static void startLoginProcess() {
         try {
-            String login;
             while (true) {
                 Main.login = Login.login();
                 boolean loginExists = LoginModel.loginStep1(Main.login);
                 if (loginExists) {
-                    System.out.println("Login aceito: " + Main.login);
-                    break;
+                    if(DatabaseManager.userIsBlocked(login)){
+                        JOptionPane.showMessageDialog(null, "Seu acesso está bloqueado.");
+                    }
+                    else {
+                        break;
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
@@ -65,14 +69,24 @@ public class Main {
     }
     private static void startPasswordProcess() {
         try {
-            List<String> passwords = null;
-            while (true) {
+            int attemptsRemaining = 3;
+            List<String> passwords = Collections.emptyList();
+            while (attemptsRemaining > 0) {
                 passwords = Login.collectPassword();
                 boolean passwordCorrect = LoginModel.loginStep2(Main.login, passwords);
                 if (passwordCorrect) {
                     break;
                 } else {
-                    JOptionPane.showMessageDialog(null, "Senha incorreta. Tente novamente.");
+                    attemptsRemaining -= 1;
+                    if (attemptsRemaining == 0){
+                        DatabaseManager.blockUser(login);
+                        // TODO: Redirecionar para a tela de login
+                        JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
+                        System.exit(0);
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Senha incorreta. Tentativas restantes: " + attemptsRemaining);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -82,14 +96,24 @@ public class Main {
 
     private static void startTotpProcess() {
         try {
+            int attemptsRemaining = 3;
             String totpCode;
-            while (true) {
+            while (attemptsRemaining > 0) {
                 totpCode = Login.collectTOTPCode();
                 boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login), totpCode);
-                if (codeCorrect) {
+                if(codeCorrect){
                     break;
-                } else {
-                    JOptionPane.showMessageDialog(null, "Código incorreto. Tente novamente.");
+                }
+                else {
+                    attemptsRemaining -= 1;
+                    if (attemptsRemaining == 0) {
+                        DatabaseManager.blockUser(login);
+                        // TODO: Redirecionar para a tela de login
+                        JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
+                        System.exit(0);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Código incorreto. Tentativas restantes: " + attemptsRemaining);
+                    }
                 }
             }
         } catch (Exception e) {

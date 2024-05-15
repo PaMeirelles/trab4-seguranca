@@ -89,6 +89,18 @@ public class DatabaseManager {
 
     }
 
+    public static void blockUser(String login) throws SQLException {
+        long currentTime = System.currentTimeMillis();
+        long blockedUntil = currentTime + Constants.BLOCK_TIME;
+        String query = "UPDATE usuarios SET blocked_until = ? WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setLong(1, blockedUntil);
+        statement.setString(2, login);
+        statement.executeUpdate(); // Use executeUpdate() instead of executeQuery()
+        connection.close();
+    }
+
     public static boolean userIsBlocked(String login) throws SQLException {
         String query = "SELECT blocked_until FROM usuarios WHERE login = ?";
         Connection connection = getConnection();
@@ -100,15 +112,15 @@ public class DatabaseManager {
 
         if (resultSet.next()) { // Move the cursor to the first row
             long blockedUntil = resultSet.getLong("blocked_until");
-
             if (resultSet.wasNull()) { // Check if the value was NULL
+                connection.close();
                 return false; // If it was NULL, return false
             }
-
             long currentTime = System.currentTimeMillis();
+            connection.close();
             return blockedUntil > currentTime; // Check if blockedUntil is in the future
         }
-
+        connection.close();
         return false; // Return false if no rows were found for the given login
     }
 
@@ -121,8 +133,10 @@ public class DatabaseManager {
         statement.setString(1, login);
 
         ResultSet resultSet = statement.executeQuery();
+        byte[] bytes = resultSet.getBytes("private_key");
+        connection.close();
 
-        return resultSet.getBytes("private_key");
+        return bytes;
     }
     private static byte[] preparePrivateKey(PrivateKey privateKey, String secretPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
@@ -161,7 +175,7 @@ public class DatabaseManager {
         if (generatedKeys.next()) {
             generatedKid = generatedKeys.getInt(1);
         }
-
+        connection.close();
         return generatedKid;
     }
 
@@ -176,6 +190,7 @@ public class DatabaseManager {
         statement.setString(5, friendlyName);
 
         statement.executeUpdate();
+        connection.close();
     }
 
     public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -198,7 +213,7 @@ public class DatabaseManager {
 
     public static void main(String[] args) throws Exception{
         String login = "admin@inf1416.puc-rio.br";
-        boolean isBlocked = userIsBlocked(login);
-        System.out.println(isBlocked);
+        boolean userIsLocked = userIsBlocked(login);
+        System.out.println(userIsLocked);
     }
 }
