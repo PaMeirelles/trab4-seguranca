@@ -55,7 +55,7 @@ public class Register {
         return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
-    private Key genKey(String seed) throws NoSuchAlgorithmException {
+    public static Key genKey(String seed) throws NoSuchAlgorithmException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(seed.getBytes());
 

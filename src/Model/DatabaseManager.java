@@ -9,6 +9,7 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.sql.*;
 import java.util.Base64;
+import org.bouncycastle.util.encoders.Base32;
 
 public class DatabaseManager {
     public static boolean isFirstAccess() throws SQLException {
@@ -150,9 +151,12 @@ public class DatabaseManager {
         return cipher.doFinal(privateKey.getEncoded());
     }
 
-    private static String prepareTotpKey(String password, String totpKey){
-        // TODO
-        return "";
+    private static String prepareTotpKey(String password, String totpKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key chave = Register.genKey(password);
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
+        cipher.init(Cipher.ENCRYPT_MODE, chave);
+        byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
+        return new String(Base32.encode(encryptedBytes));
     }
 
     private static int getGroupId(Group group){
