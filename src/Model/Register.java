@@ -1,6 +1,5 @@
 package Model;
 
-import org.bouncycastle.util.encoders.Base32;
 
 import javax.crypto.*;
 import java.io.FileInputStream;
@@ -145,7 +144,8 @@ public class Register {
 
     private String generateTotpKey() throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
         byte[] randomBytes = genRandomBytes(Constants.TOTP_SIZE);
-        return new String(Base32.encode(randomBytes));
+        Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
+        return base32Encoder.toString(randomBytes);
     }
 
     public void registerAdmin() throws Exception {
