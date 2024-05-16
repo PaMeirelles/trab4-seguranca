@@ -217,14 +217,22 @@ public class DatabaseManager {
         return "admin@inf1416.puc-rio.br";
     }
 
-    public static String getUserTotpKey(String login){
-        // TODO
-        return "NXV37JUCLJFU7AO5NTCJ23Y5SJKQQIP4VUTCJQDF3K4BVMFWQ7QQ====";
+    public static String getUserTotpKey(String login) throws SQLException {
+        Connection conn = getConnection();
+        String query = "SELECT totp_key FROM KeyByLogin WHERE login = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+
+        statement.setString(1, login);
+        ResultSet resultSet = statement.executeQuery();
+        String code = resultSet.getString("totp_key");
+        conn.close();
+
+        return code;
     }
 
     public static void main(String[] args) throws Exception{
         String login = "admin@inf1416.puc-rio.br";
-        boolean userIsLocked = userIsBlocked(login);
-        System.out.println(userIsLocked);
+        String key = getUserTotpKey(login);
+        System.out.println(key);
     }
 }
