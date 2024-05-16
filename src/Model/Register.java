@@ -32,6 +32,7 @@ public class Register {
     public CertificateInfo certificateInfo;
     public PrivateKey privateKey;
     public X509Certificate certificate;
+    public String totpKey;
 
     public void fillInfo(String certPath, String keyPath, String secretPhrase, String group, String password, String confirmPassword) {
         this.pathCertificate = certPath;
@@ -54,7 +55,7 @@ public class Register {
         return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
-    private Key genKey(String seed) throws NoSuchAlgorithmException {
+    public static Key genKey(String seed) throws NoSuchAlgorithmException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(seed.getBytes());
 
@@ -144,19 +145,16 @@ public class Register {
 
     private String generateTotpKey() throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
         byte[] randomBytes = genRandomBytes(Constants.TOTP_SIZE);
-        Key chave = genKey(password);
-        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
-        cipher.init(Cipher.ENCRYPT_MODE, chave);
-        byte[] encryptedBytes = cipher.doFinal(randomBytes);
-        return new String(Base32.encode(encryptedBytes));
+        return new String(Base32.encode(randomBytes));
     }
 
     public void registerAdmin() throws Exception {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
+        this.totpKey = generateTotpKey();
         this.fillPrivateKey(retrievePrivateKey(), true);
         this.checkInfo();
-        DatabaseManager.saveUser(secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
+        DatabaseManager.saveUser(totpKey, secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
     public boolean validatesecretPhrase(String login, String secretPhrase) throws Exception {

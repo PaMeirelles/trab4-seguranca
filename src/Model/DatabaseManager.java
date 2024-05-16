@@ -9,6 +9,7 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.sql.*;
 import java.util.Base64;
+import org.bouncycastle.util.encoders.Base32;
 
 public class DatabaseManager {
     public static boolean isFirstAccess() throws SQLException {
@@ -150,6 +151,14 @@ public class DatabaseManager {
         return cipher.doFinal(privateKey.getEncoded());
     }
 
+    private static String prepareTotpKey(String password, String totpKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key chave = Register.genKey(password);
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
+        cipher.init(Cipher.ENCRYPT_MODE, chave);
+        byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
+        return new String(Base32.encode(encryptedBytes));
+    }
+
     private static int getGroupId(Group group){
         switch (group) {
             case ADMIN:
@@ -160,11 +169,12 @@ public class DatabaseManager {
                 return -1;
         }    }
 
-    private static int saveKeys(String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key) VALUES (?, ?)";
+    private static int saveKeys(String totpKey, String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection, String password) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key, totp_key) VALUES (?, ?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
         String encodedCertificate = Base64.getEncoder().encodeToString(certificate.getEncoded());
 
+        statement.setString(3, prepareTotpKey(password, totpKey));
         statement.setBytes(2, preparePrivateKey(privateKey, secretPhrase));
         statement.setString(1, encodedCertificate);
 
@@ -193,9 +203,9 @@ public class DatabaseManager {
         connection.close();
     }
 
-    public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public static void saveUser(String totpKey, String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Connection connection = getConnection();
-        int kid = saveKeys(secretPhrase, privateKey, certificate, connection);
+        int kid = saveKeys(totpKey, secretPhrase, privateKey, certificate, connection, password);
         String preparedPassword = preparePassword(password);
         saveUser(kid, login, preparedPassword, friendlyName, group, connection);
         connection.close();
