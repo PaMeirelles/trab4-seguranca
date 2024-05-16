@@ -9,7 +9,6 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.sql.*;
 import java.util.Base64;
-import org.bouncycastle.util.encoders.Base32;
 
 public class DatabaseManager {
     public static boolean isFirstAccess() throws SQLException {
@@ -156,7 +155,8 @@ public class DatabaseManager {
         Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
         cipher.init(Cipher.ENCRYPT_MODE, chave);
         byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
-        return new String(Base32.encode(encryptedBytes));
+        Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
+        return base32Encoder.toString(encryptedBytes);
     }
 
     private static int getGroupId(Group group){
@@ -167,7 +167,8 @@ public class DatabaseManager {
                 return 2;
             default:
                 return -1;
-        }    }
+        }
+    }
 
     private static int saveKeys(String totpKey, String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection, String password) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key, totp_key) VALUES (?, ?, ?)";
