@@ -17,7 +17,7 @@ public class MainMenu {
         JButton sairButton = new JButton("3 - Sair do Sistema");
 
         cadastrarUsuarioButton.addActionListener(e -> {
-            RegistrationForm.register();
+            RegistrationManager.register(false);
         });
 
         consultarPastaButton.addActionListener(e -> {
