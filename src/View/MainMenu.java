@@ -43,4 +43,7 @@ public class MainMenu {
     private static void telaDeSaida(){
         // TODO
     }
+    public static void main(String[] args){
+        MainMenu.createAndShowGUI();
+    }
 }
