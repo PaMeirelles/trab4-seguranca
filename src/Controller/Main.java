@@ -3,10 +3,8 @@ package Controller;
 import Model.DatabaseManager;
 import Model.LoginModel;
 import Model.Register;
-import View.AdminValidation;
-import View.Login;
-import View.MainMenu;
-import View.RegistrationForm;
+import View.*;
+
 import javax.swing.*;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -17,17 +15,15 @@ public class Main {
     public static String login = null;
     public static void main(String[] args) throws SQLException {
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
-        Register r = new Register();
 
         if (isFirstAccess) {
-            RegistrationForm.register();
-        } else {
-            startAuthenticationProcess();
-            startLoginProcess();
-            startPasswordProcess();
-            startTotpProcess();
-            MainMenu.createAndShowGUI();
+            while(!RegistrationManager.register(true));
         }
+        startAuthenticationProcess();
+        startLoginProcess();
+        startPasswordProcess();
+        startTotpProcess();
+        MainMenu.createAndShowGUI();
     }
     private static void startAuthenticationProcess() {
         frase_secreta = AdminValidation.secretPhraseInput();

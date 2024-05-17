@@ -8,17 +8,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class RegistrationForm extends JFrame {
+public class RegistrationForm extends JDialog {
     private JTextField textFieldCertPath;
     private JTextField textFieldKeyPath;
     private JTextField textFieldSecretPhrase;
     private JComboBox<String> comboBoxGroup;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
+    private boolean registrationSuccessful;
 
-    public RegistrationForm(RegistrationCallback callback) {
-        setTitle("Cadastro de Usuário");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public RegistrationForm(Frame owner, boolean isFirstAccess, RegistrationCallback callback) {
+        super(owner, "Cadastro de Usuário", true); // true for modal
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(400, 300);
         setLayout(new GridLayout(7, 2, 10, 10));
 
@@ -38,7 +39,11 @@ public class RegistrationForm extends JFrame {
         add(textFieldSecretPhrase);
 
         JLabel labelGroup = new JLabel("Grupo:");
-        comboBoxGroup = new JComboBox<>(new String[]{"ADMIN", "USER"});
+        if (isFirstAccess) {
+            comboBoxGroup = new JComboBox<>(new String[]{"ADMIN"});
+        } else {
+            comboBoxGroup = new JComboBox<>(new String[]{"ADMIN", "USER"});
+        }
         add(labelGroup);
         add(comboBoxGroup);
 
@@ -64,37 +69,33 @@ public class RegistrationForm extends JFrame {
                     String password = new String(passwordField.getPassword());
                     String confirmPassword = new String(confirmPasswordField.getPassword());
                     callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-
+                    registrationSuccessful = true; // Registration was successful
+                    dispose(); // Close the dialog
                 }
-                catch (PasswordMismatchException ex){
+                catch (PasswordMismatchException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não são iguais");
                 }
-                catch (InvalidPasswordFormatException ex){
+                catch (InvalidPasswordFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Formato inválido. Senhas devem ser númericas e possuir entre 8 e 10 dígitos");
                 }
-                catch (InvalidPrivateKeyException ex){
+                catch (InvalidPrivateKeyException ex) {
                     JOptionPane.showMessageDialog(null, "Chave privada inválida");
                 }
-                catch (RepeatingCharactersException ex){
+                catch (RepeatingCharactersException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não podem possuir dígitos repetidos");
                 }
-                catch (LoginNotUniqueException ex){
+                catch (LoginNotUniqueException ex) {
                     JOptionPane.showMessageDialog(null, "Login já cadastrado");
                 }
-                catch (Exception ex){
+                catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
         add(buttonRegister);
-
-        setVisible(true);
     }
-    public static void register() {
-        Register r = new Register();
-            RegistrationForm form = new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
-                r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerUser();
-            });
+
+    public boolean isRegistrationSuccessful() {
+        return registrationSuccessful;
     }
 }
