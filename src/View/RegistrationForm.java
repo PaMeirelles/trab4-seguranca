@@ -56,25 +56,22 @@ public class RegistrationForm extends JFrame {
         buttonRegister.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                while (true){
-                    try {
-                        String certPath = textFieldCertPath.getText();
-                        String keyPath = textFieldKeyPath.getText();
-                        String secretPhrase = textFieldSecretPhrase.getText();
-                        String group = (String) comboBoxGroup.getSelectedItem();
-                        String password = new String(passwordField.getPassword());
-                        String confirmPassword = new String(confirmPasswordField.getPassword());
-                        callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                        break;
-                    }
-                    catch (PasswordMismatchException ex){
-                        JOptionPane.showMessageDialog(null, "Senhas não são iguais");
-                    }
-                    catch (Exception ex){
-                        throw new RuntimeException(ex);
-                    }
-                }
+                try {
+                    String certPath = textFieldCertPath.getText();
+                    String keyPath = textFieldKeyPath.getText();
+                    String secretPhrase = textFieldSecretPhrase.getText();
+                    String group = (String) comboBoxGroup.getSelectedItem();
+                    String password = new String(passwordField.getPassword());
+                    String confirmPassword = new String(confirmPasswordField.getPassword());
+                    callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
 
+                }
+                catch (PasswordMismatchException ex){
+                    JOptionPane.showMessageDialog(null, "Senhas não são iguais");
+                }
+                catch (Exception ex){
+                    throw new RuntimeException(ex);
+                }
             }
         });
         add(buttonRegister);
