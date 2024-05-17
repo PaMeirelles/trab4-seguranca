@@ -20,10 +20,7 @@ public class Main {
         Register r = new Register();
 
         if (isFirstAccess) {
-            new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
-                r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerAdmin();
-            });
+            RegistrationForm.register();
         } else {
             startAuthenticationProcess();
             startLoginProcess();

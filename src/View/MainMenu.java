@@ -1,6 +1,6 @@
 package View;
 
-import Model.Register;
+import Model.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,11 +17,7 @@ public class MainMenu {
         JButton sairButton = new JButton("3 - Sair do Sistema");
 
         cadastrarUsuarioButton.addActionListener(e -> {
-            Register r = new Register();
-            new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
-                r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerAdmin();
-            });
+            RegistrationForm.register();
         });
 
         consultarPastaButton.addActionListener(e -> {

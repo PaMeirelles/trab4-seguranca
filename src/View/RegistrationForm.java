@@ -1,6 +1,7 @@
 package View;
 
 import Controller.RegistrationCallback;
+import Model.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,15 +56,32 @@ public class RegistrationForm extends JFrame {
         buttonRegister.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String certPath = textFieldCertPath.getText();
-                String keyPath = textFieldKeyPath.getText();
-                String secretPhrase = textFieldSecretPhrase.getText();
-                String group = (String) comboBoxGroup.getSelectedItem();
-                String password = new String(passwordField.getPassword());
-                String confirmPassword = new String(confirmPasswordField.getPassword());
                 try {
+                    String certPath = textFieldCertPath.getText();
+                    String keyPath = textFieldKeyPath.getText();
+                    String secretPhrase = textFieldSecretPhrase.getText();
+                    String group = (String) comboBoxGroup.getSelectedItem();
+                    String password = new String(passwordField.getPassword());
+                    String confirmPassword = new String(confirmPasswordField.getPassword());
                     callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                } catch (Exception ex) {
+
+                }
+                catch (PasswordMismatchException ex){
+                    JOptionPane.showMessageDialog(null, "Senhas não são iguais");
+                }
+                catch (InvalidPasswordFormatException ex){
+                    JOptionPane.showMessageDialog(null, "Formato inválido. Senhas devem ser númericas e possuir entre 8 e 10 dígitos");
+                }
+                catch (InvalidPrivateKeyException ex){
+                    JOptionPane.showMessageDialog(null, "Chave privada inválida");
+                }
+                catch (RepeatingCharactersException ex){
+                    JOptionPane.showMessageDialog(null, "Senhas não podem possuir dígitos repetidos");
+                }
+                catch (LoginNotUniqueException ex){
+                    JOptionPane.showMessageDialog(null, "Login já cadastrado");
+                }
+                catch (Exception ex){
                     throw new RuntimeException(ex);
                 }
             }
@@ -71,5 +89,12 @@ public class RegistrationForm extends JFrame {
         add(buttonRegister);
 
         setVisible(true);
+    }
+    public static void register() {
+        Register r = new Register();
+            RegistrationForm form = new RegistrationForm((certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
+                r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
+                r.registerUser();
+            });
     }
 }
