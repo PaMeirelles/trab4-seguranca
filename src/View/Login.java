@@ -2,6 +2,7 @@ package View;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -48,6 +49,24 @@ public class Login extends JFrame {
             return null;
         }
     }
+    private static List<String> generateLabels(){
+        String chars = "0123456789";
+
+        List<Character> charList = new ArrayList<>();
+        for (char c : chars.toCharArray()) {
+            charList.add(c);
+        }
+
+        Collections.shuffle(charList);
+
+        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < charList.size(); i += 2) {
+            labels.add(String.valueOf(charList.get(i)) + '-' + charList.get(i + 1));
+        }
+        labels.add("Clear");
+        labels.add("Enter");
+        return labels;
+    }
     public static List<String> collectPassword() {
         final List<String>[] possiblePasswords = new List[]{new ArrayList<>()}; // Initialize an empty ArrayList
         possiblePasswords[0].add("");
@@ -61,12 +80,9 @@ public class Login extends JFrame {
         passwordField.setEditable(false);
 
         JPanel keyboardPanel = new JPanel(new GridLayout(2, 5));
-        String[] buttonLabels = {
-                "0-1", "2-3", "4-5", "6-7", "8-9",
-                "Clear", "Enter"
-        };
+        final List<String>[] buttonLabels = new List[]{generateLabels()};
 
-        for (String label : buttonLabels) {
+        for (String label : buttonLabels[0]) {
             JButton button = new JButton(label);
             button.addActionListener(new ActionListener() {
                 @Override
@@ -86,6 +102,14 @@ public class Login extends JFrame {
                         }
                         possiblePasswords[0].clear();
                         possiblePasswords[0].addAll(buffer);
+                    }
+                    buttonLabels[0] = generateLabels();
+                    int index = 0;
+                    for (Component component : keyboardPanel.getComponents()) {
+                        if (component instanceof JButton) {
+                            JButton button = (JButton) component;
+                            button.setText(buttonLabels[0].get(index++));
+                        }
                     }
                 }
             });

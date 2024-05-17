@@ -89,6 +89,42 @@ public class DatabaseManager {
 
     }
 
+    public static void blockUser(String login) throws SQLException {
+        long currentTime = System.currentTimeMillis();
+        long blockedUntil = currentTime + Constants.BLOCK_TIME;
+        String query = "UPDATE usuarios SET blocked_until = ? WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setLong(1, blockedUntil);
+        statement.setString(2, login);
+        statement.executeUpdate(); // Use executeUpdate() instead of executeQuery()
+        connection.close();
+    }
+
+    public static boolean userIsBlocked(String login) throws SQLException {
+        String query = "SELECT blocked_until FROM usuarios WHERE login = ?";
+        Connection connection = getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+
+        statement.setString(1, login);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) { // Move the cursor to the first row
+            long blockedUntil = resultSet.getLong("blocked_until");
+            if (resultSet.wasNull()) { // Check if the value was NULL
+                connection.close();
+                return false; // If it was NULL, return false
+            }
+            long currentTime = System.currentTimeMillis();
+            connection.close();
+            return blockedUntil > currentTime; // Check if blockedUntil is in the future
+        }
+        connection.close();
+        return false; // Return false if no rows were found for the given login
+    }
+
+
     public static byte[] retrieveprivateKeyBytes(String login) throws SQLException {
         String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
         Connection connection = getConnection();
@@ -97,8 +133,10 @@ public class DatabaseManager {
         statement.setString(1, login);
 
         ResultSet resultSet = statement.executeQuery();
+        byte[] bytes = resultSet.getBytes("private_key");
+        connection.close();
 
-        return resultSet.getBytes("private_key");
+        return bytes;
     }
     private static byte[] preparePrivateKey(PrivateKey privateKey, String secretPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
@@ -112,6 +150,15 @@ public class DatabaseManager {
         return cipher.doFinal(privateKey.getEncoded());
     }
 
+    private static String prepareTotpKey(String password, String totpKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key chave = Register.genKey(password);
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
+        cipher.init(Cipher.ENCRYPT_MODE, chave);
+        byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
+        Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
+        return base32Encoder.toString(encryptedBytes);
+    }
+
     private static int getGroupId(Group group){
         switch (group) {
             case ADMIN:
@@ -120,13 +167,15 @@ public class DatabaseManager {
                 return 2;
             default:
                 return -1;
-        }    }
+        }
+    }
 
-    private static int saveKeys(String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key) VALUES (?, ?)";
+    private static int saveKeys(String totpKey, String secretPhrase, PrivateKey privateKey, Certificate certificate, Connection connection, String password) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String insertSQL = "INSERT INTO chaveiro (digital_certificate, private_key, totp_key) VALUES (?, ?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
         String encodedCertificate = Base64.getEncoder().encodeToString(certificate.getEncoded());
 
+        statement.setString(3, prepareTotpKey(password, totpKey));
         statement.setBytes(2, preparePrivateKey(privateKey, secretPhrase));
         statement.setString(1, encodedCertificate);
 
@@ -137,7 +186,7 @@ public class DatabaseManager {
         if (generatedKeys.next()) {
             generatedKid = generatedKeys.getInt(1);
         }
-
+        connection.close();
         return generatedKid;
     }
 
@@ -152,11 +201,12 @@ public class DatabaseManager {
         statement.setString(5, friendlyName);
 
         statement.executeUpdate();
+        connection.close();
     }
 
-    public static void saveUser(String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public static void saveUser(String totpKey, String secretPhrase, String login, String password, PrivateKey privateKey, Certificate certificate, String friendlyName, Group group) throws SQLException, CertificateEncodingException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Connection connection = getConnection();
-        int kid = saveKeys(secretPhrase, privateKey, certificate, connection);
+        int kid = saveKeys(totpKey, secretPhrase, privateKey, certificate, connection, password);
         String preparedPassword = preparePassword(password);
         saveUser(kid, login, preparedPassword, friendlyName, group, connection);
         connection.close();
@@ -173,7 +223,8 @@ public class DatabaseManager {
     }
 
     public static void main(String[] args) throws Exception{
-        boolean fa = isFirstAccess();
-        System.out.println(fa);
+        String login = "admin@inf1416.puc-rio.br";
+        boolean userIsLocked = userIsBlocked(login);
+        System.out.println(userIsLocked);
     }
 }
