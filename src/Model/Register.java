@@ -148,7 +148,7 @@ public class Register {
         return base32Encoder.toString(randomBytes);
     }
 
-    public void registerUser() throws Exception {
+    public void registerUser() throws InvalidPrivateKeyException, PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, InvalidPasswordFormatException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, LoginNotUniqueException, IOException, InvalidKeySpecException, CertificateException {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.totpKey = generateTotpKey();

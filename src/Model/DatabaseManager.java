@@ -12,6 +12,8 @@ import java.util.Base64;
 
 public class DatabaseManager {
     public static boolean isFirstAccess() throws SQLException {
+        return true;
+        /*
         Connection conn = getConnection();
         String query = "SELECT COUNT(*) AS count FROM usuarios";
         PreparedStatement statement = conn.prepareStatement(query);
@@ -23,7 +25,7 @@ public class DatabaseManager {
         }
         conn.close();
         return true;
-    }
+    */}
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(Constants.CONNECTION_STRING);
     }
