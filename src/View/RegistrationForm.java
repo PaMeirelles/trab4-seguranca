@@ -69,6 +69,18 @@ public class RegistrationForm extends JFrame {
                 catch (PasswordMismatchException ex){
                     JOptionPane.showMessageDialog(null, "Senhas não são iguais");
                 }
+                catch (InvalidPasswordFormatException ex){
+                    JOptionPane.showMessageDialog(null, "Formato inválido. Senhas devem ser númericas e possuir entre 8 e 10 dígitos");
+                }
+                catch (InvalidPrivateKeyException ex){
+                    JOptionPane.showMessageDialog(null, "Chave privada inválida");
+                }
+                catch (RepeatingCharactersException ex){
+                    JOptionPane.showMessageDialog(null, "Senhas não podem possuir dígitos repetidos");
+                }
+                catch (LoginNotUniqueException ex){
+                    JOptionPane.showMessageDialog(null, "Login já cadastrado");
+                }
                 catch (Exception ex){
                     throw new RuntimeException(ex);
                 }
