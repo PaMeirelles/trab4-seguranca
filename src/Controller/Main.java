@@ -17,7 +17,12 @@ public class Main {
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
 
         if (isFirstAccess) {
-            while(!RegistrationManager.register(true));
+            while(true){
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true);
+                if(r == RegistrationManager.RegistrationResult.SUCCESS){
+                    break;
+                }
+            }
         }
         startAuthenticationProcess();
         startLoginProcess();

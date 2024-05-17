@@ -16,12 +16,13 @@ public class RegistrationForm extends JDialog {
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
     private boolean registrationSuccessful;
+    private boolean goBackPressed;
 
     public RegistrationForm(Frame owner, boolean isFirstAccess, RegistrationCallback callback) {
         super(owner, "Cadastro de Usuário", true); // true for modal
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(400, 300);
-        setLayout(new GridLayout(7, 2, 10, 10));
+        setLayout(new GridLayout(8, 2, 10, 10));
 
         JLabel labelCertPath = new JLabel("Caminho do arquivo do certificado digital:");
         textFieldCertPath = new JTextField();
@@ -71,31 +72,44 @@ public class RegistrationForm extends JDialog {
                     callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
                     registrationSuccessful = true; // Registration was successful
                     dispose(); // Close the dialog
-                }
-                catch (PasswordMismatchException ex) {
+                } catch (PasswordMismatchException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não são iguais");
-                }
-                catch (InvalidPasswordFormatException ex) {
+                } catch (InvalidPasswordFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Formato inválido. Senhas devem ser númericas e possuir entre 8 e 10 dígitos");
-                }
-                catch (InvalidPrivateKeyException ex) {
+                } catch (InvalidPrivateKeyException ex) {
                     JOptionPane.showMessageDialog(null, "Chave privada inválida");
-                }
-                catch (RepeatingCharactersException ex) {
+                } catch (RepeatingCharactersException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não podem possuir dígitos repetidos");
-                }
-                catch (LoginNotUniqueException ex) {
+                } catch (LoginNotUniqueException ex) {
                     JOptionPane.showMessageDialog(null, "Login já cadastrado");
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
         add(buttonRegister);
+
+        JButton buttonGoBack = new JButton("Go Back");
+        buttonGoBack.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                goBackPressed = true;
+                dispose(); // Close the dialog
+            }
+        });
+
+        if(!isFirstAccess){
+            add(buttonGoBack);
+        }
+
+        setVisible(true);
     }
 
     public boolean isRegistrationSuccessful() {
         return registrationSuccessful;
+    }
+
+    public boolean isGoBackPressed() {
+        return goBackPressed;
     }
 }
