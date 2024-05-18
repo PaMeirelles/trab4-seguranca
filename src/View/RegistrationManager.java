@@ -8,7 +8,7 @@ public class RegistrationManager {
         while (true) {
             RegistrationForm form = new RegistrationForm(null, isFirstAccess, (certPath, keyPath, secretPhrase, group, password, confirmPassword) -> {
                 r.fillInfo(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                r.registerUser();
+                return r.registerUser();
             });
             if (form.isGoBackPressed()) {
                 return RegistrationResult.GO_BACK;
