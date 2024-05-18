@@ -68,34 +68,45 @@ public class Main {
                     log("2005");
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
-                log("2002");
             }
+            log("2002");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     private static void startPasswordProcess() {
         try {
+            log("3001", login);
             int attemptsRemaining = 3;
             List<String> passwords = Collections.emptyList();
             while (attemptsRemaining > 0) {
                 passwords = Login.collectPassword();
                 boolean passwordCorrect = LoginModel.loginStep2(Main.login, passwords);
                 if (passwordCorrect) {
+                    log("3003", login);
                     break;
                 } else {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0){
+                        log("3006", login);
                         DatabaseManager.blockUser(login);
+                        log("3007", login);
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
-                        // TODO: Redirecionar para a tela de login invés dissp
+                        // TODO: Redirecionar para a tela de login invés disso
                         System.exit(0);
                     }
                     else {
+                        if(attemptsRemaining == 1){
+                            log("3004", login);
+                        }
+                        else{
+                            log("3005", login);
+                        }
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Tentativas restantes: " + attemptsRemaining);
                     }
                 }
             }
+            log("3002");
         } catch (Exception e) {
             e.printStackTrace();
         }
