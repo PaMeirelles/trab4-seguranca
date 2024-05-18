@@ -98,29 +98,27 @@ public class VaultHandler {
     }
 
     public static List<SecretFile> decodeIndex(String secretPhrase, String folderPath) throws Exception {
-        // TODO: Tratar adequadamente os casos de erro
         Register r = new Register();
         boolean phraseValid = r.validateAdmin(secretPhrase);
         if (!phraseValid){
-            throw new Exception();
+            throw new InvalidPhraseException();
         }
         byte[] indexInfo = decryptFile(folderPath, r.privateKey, "index");
         boolean integrity = checkIntegrity(folderPath, "index.asd", r.certificateInfo.publicKey, indexInfo);
         if (!integrity){
-            throw new Exception();
+            throw new IntegrityCheckFailedException();
         }
         return parseSecretFiles(new String(indexInfo));
     }
 
     public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey privateKey, PublicKey publicKey) throws Exception {
-        // TODO
         if(!Objects.equals(loggedUser, sf.owner)){
-            throw new Exception();
+            throw new PermissionDeniedException();
         }
         byte[] content = decryptFile(pathFolder, privateKey, sf.fakeName);
         boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", publicKey, content);
         if(!integrity){
-            throw new Exception();
+            throw new IntegrityCheckFailedException();
         }
         writeToFile(content, pathFolder, sf.trueName);
     }
