@@ -16,4 +16,5 @@ public class Constants {
     public static final long INTERVAL_IN_MILISSECONDS = 30000;
     public static final String HMACSHA1 = "HmacSHA1";
     public static final long BLOCK_TIME = 1000 * 60 * 2;
+    public static final String DIGITAL_SIGNATURE_ALGO = "SHA256withRSA";
 }

@@ -98,7 +98,7 @@ public class Register {
         MessageDigest md = MessageDigest.getInstance(Constants.DIGEST_ALGO);
         byte[] hashedData = md.digest(data);
 
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
         byte[] digitalSignature = cipher.doFinal(hashedData);
 
