@@ -24,7 +24,11 @@ public class MainMenu {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            RegistrationManager.register(false);
+            try {
+                RegistrationManager.register(false, login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         consultarPastaButton.addActionListener(e -> {

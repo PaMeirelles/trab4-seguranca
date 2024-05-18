@@ -21,7 +21,7 @@ public class Main {
 
         if (isFirstAccess) {
             while(true){
-                RegistrationManager.RegistrationResult r = RegistrationManager.register(true);
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
                     break;
                 }

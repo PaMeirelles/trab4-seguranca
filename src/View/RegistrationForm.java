@@ -11,6 +11,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
 import static Model.CertificateInfo.extractCommonName;
@@ -26,8 +27,9 @@ public class RegistrationForm extends JDialog {
     private boolean registrationSuccessful;
     private boolean goBackPressed;
 
-    public RegistrationForm(Frame owner, boolean isFirstAccess, RegistrationCallback callback) {
+    public RegistrationForm(String login, Frame owner, boolean isFirstAccess, RegistrationCallback callback) throws SQLException {
         super(owner, "Cadastro de Usuário", true); // true for modal
+        DatabaseManager.log("6001");
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(600, 400);
         setLayout(new GridLayout(8, 2, 10, 10));
@@ -71,6 +73,7 @@ public class RegistrationForm extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    DatabaseManager.log("6002", login);
                     String certPath = textFieldCertPath.getText();
                     String keyPath = textFieldKeyPath.getText();
                     String secretPhrase = textFieldSecretPhrase.getText();
@@ -78,18 +81,10 @@ public class RegistrationForm extends JDialog {
                     String password = new String(passwordField.getPassword());
                     String confirmPassword = new String(confirmPasswordField.getPassword());
 
-                    // Check if passwords match
-                    if (!password.equals(confirmPassword)) {
-                        throw new PasswordMismatchException();
-                    }
-
                     // Extract certificate details
                     X509Certificate certificate = loadCertificate(certPath);
-                    if (certificate == null) {
-                        throw new InvalidPrivateKeyException();
-                    }
 
-                    if (showConfirmationDialog(certificate)) {
+                    if (showConfirmationDialog(certificate, login)) {
                         String totpKey = callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
                         registrationSuccessful = true;
                         dispose();
@@ -97,16 +92,48 @@ public class RegistrationForm extends JDialog {
                     }
 
                 } catch (PasswordMismatchException ex) {
+                    try {
+                        DatabaseManager.log("6003", login);
+                    } catch (SQLException exc) {
+                        throw new RuntimeException(exc);
+                    }
                     JOptionPane.showMessageDialog(null, "Senhas não são iguais");
                 } catch (InvalidPasswordFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Formato inválido. Senhas devem ser númericas e possuir entre 8 e 10 dígitos");
                 } catch (InvalidPrivateKeyException ex) {
-                    JOptionPane.showMessageDialog(null, "Chave privada inválida");
+                    try {
+                        if (ex.ikt == InvalidPrivateKeyException.InvalidKeyType.INVALID_PATH) {
+                            DatabaseManager.log("6005", login);
+                            JOptionPane.showMessageDialog(null, "Caminho inválido para chave privada");
+                        }
+                        else if (ex.ikt == InvalidPrivateKeyException.InvalidKeyType.INVALID_SECRET_PHRASE) {
+                            DatabaseManager.log("6006", login);
+                            JOptionPane.showMessageDialog(null, "Frase secreta inválida");
+                        }
+                        else if (ex.ikt == InvalidPrivateKeyException.InvalidKeyType.INVALID_DIGITAL_SIGNATURE){
+                            DatabaseManager.log("6007", login);
+                            JOptionPane.showMessageDialog(null, "Chave privada não corresponde à chave pública fornecida");
+
+                        }
+                    }
+                    catch (SQLException excep){
+                        throw new RuntimeException(excep);
+                    }
                 } catch (RepeatingCharactersException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não podem possuir dígitos repetidos");
                 } catch (LoginNotUniqueException ex) {
                     JOptionPane.showMessageDialog(null, "Login já cadastrado");
-                } catch (Exception ex) {
+                }
+                catch (CertificatePathNotFoundException ex){
+                    try {
+                        DatabaseManager.log("6004", login);
+                        JOptionPane.showMessageDialog(null, "Caminho inválido para certificado digital");
+                    } catch (SQLException exc) {
+                        throw new RuntimeException(exc);
+                    }
+                    JOptionPane.showMessageDialog(null, "Login já cadastrado");
+                }
+                catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -118,6 +145,11 @@ public class RegistrationForm extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 goBackPressed = true;
+                try {
+                    DatabaseManager.log("6010", login);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
                 dispose(); // Close the dialog
             }
         });
@@ -143,7 +175,7 @@ public class RegistrationForm extends JDialog {
         }
     }
 
-    private boolean showConfirmationDialog(X509Certificate certificate) {
+    private boolean showConfirmationDialog(X509Certificate certificate, String login) throws SQLException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         StringBuilder certDetails = new StringBuilder();
         certDetails.append("Versão: ").append(certificate.getVersion()).append("\n");
@@ -155,6 +187,12 @@ public class RegistrationForm extends JDialog {
         certDetails.append("E-mail: ").append(extractEmail(certificate.getSubjectX500Principal().getName())).append("\n");
 
         int result = JOptionPane.showConfirmDialog(this, certDetails.toString(), "Confirmação do Certificado Digital", JOptionPane.OK_CANCEL_OPTION);
+        if(result == JOptionPane.OK_OPTION){
+            DatabaseManager.log("6008", login);
+        }
+        else if(result == JOptionPane.CANCEL_OPTION){
+            DatabaseManager.log("6009", login);
+        }
         return result == JOptionPane.OK_OPTION;
     }
 
