@@ -112,7 +112,8 @@ public class Main {
         }
     }
 
-    private static void startTotpProcess() {
+    private static void startTotpProcess() throws SQLException {
+        log("4001", login);
         try {
             int attemptsRemaining = 3;
             String totpCode;
@@ -120,20 +121,30 @@ public class Main {
                 totpCode = Login.collectTOTPCode();
                 boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login), totpCode);
                 if(codeCorrect){
+                    log("4003", login);
                     break;
                 }
                 else {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0) {
+                        log("4006", login);
                         DatabaseManager.blockUser(login);
+                        log("4007", login);
                         JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
                         // TODO: Redirecionar para a tela de login
                         System.exit(0);
                     } else {
+                        if(attemptsRemaining == 1){
+                            log("4004", login);
+                        }
+                        else{
+                            log("4005", login);
+                        }
                         JOptionPane.showMessageDialog(null, "Código incorreto. Tentativas restantes: " + attemptsRemaining);
                     }
                 }
             }
+            log("4002", login);
         } catch (Exception e) {
             e.printStackTrace();
         }
