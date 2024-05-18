@@ -47,7 +47,7 @@ public class VaultHandler {
         }
     }
 
-    private static boolean checkIntegrity(String folder, String name, Key key){
+    private static boolean checkIntegrity(String folder, String name, Key key, byte[] content){
         // TODO
         return true;
     }
@@ -89,21 +89,27 @@ public class VaultHandler {
         // TODO: Tratar adequadamente os casos de erro
         Register r = new Register();
         boolean phraseValid = r.validateAdmin(secretPhrase);
-        boolean integrity = checkIntegrity(folderPath, "index.asd", r.privateKey);
-        if (!phraseValid || !integrity){
+        if (!phraseValid){
             throw new Exception();
         }
         byte[] indexInfo = decryptFile(folderPath, r.privateKey, "index");
+        boolean integrity = checkIntegrity(folderPath, "index.asd", r.privateKey, indexInfo);
+        if (!integrity){
+            throw new Exception();
+        }
         return parseSecretFiles(new String(indexInfo));
     }
 
     public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey key) throws Exception {
-        boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", key);
         // TODO
-        if(!Objects.equals(loggedUser, sf.owner) || !integrity){
+        if(!Objects.equals(loggedUser, sf.owner)){
             throw new Exception();
         }
         byte[] content = decryptFile(pathFolder, key, sf.fakeName);
+        boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", key, content);
+        if(!integrity){
+            throw new Exception();
+        }
         writeToFile(content, pathFolder, sf.trueName);
     }
 
