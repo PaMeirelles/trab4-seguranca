@@ -10,10 +10,13 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
+import static Model.DatabaseManager.log;
+
 public class Main {
     public static String frase_secreta = null;
     public static String login = null;
     public static void main(String[] args) throws SQLException {
+        log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
 
         if (isFirstAccess) {
@@ -28,20 +31,21 @@ public class Main {
         startLoginProcess();
         startPasswordProcess();
         startTotpProcess();
+        log("1003", login);
         MainMenu.createAndShowGUI();
     }
-    private static void startAuthenticationProcess() {
+    private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();
 
         Register r = new Register();
         try {
             if (!r.validateAdmin(frase_secreta)){
                 JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
-                System.exit(1);
+                Main.endSystem();
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
-            System.exit(1);
+            Main.endSystem();
         }
     }
 
@@ -78,8 +82,8 @@ public class Main {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0){
                         DatabaseManager.blockUser(login);
-                        // TODO: Redirecionar para a tela de login
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
+                        // TODO: Redirecionar para a tela de login invés dissp
                         System.exit(0);
                     }
                     else {
@@ -106,8 +110,8 @@ public class Main {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0) {
                         DatabaseManager.blockUser(login);
-                        // TODO: Redirecionar para a tela de login
                         JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
+                        // TODO: Redirecionar para a tela de login
                         System.exit(0);
                     } else {
                         JOptionPane.showMessageDialog(null, "Código incorreto. Tentativas restantes: " + attemptsRemaining);
@@ -117,5 +121,9 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public static void endSystem() throws SQLException {
+        log("1002");
+        System.exit(0);
     }
 }

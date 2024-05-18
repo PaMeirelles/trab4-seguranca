@@ -1,6 +1,9 @@
 package View;
 
+import Controller.Main;
+
 import javax.swing.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
 public class Login extends JFrame {
-    public static String login() {
+    public static String login() throws SQLException {
         JDialog dialog = new JDialog((Frame) null, "Login", true);
         JTextField textField = new JTextField(20);
         JButton okButton = new JButton("OK");
@@ -38,14 +41,20 @@ public class Login extends JFrame {
         });
 
         okButton.addActionListener(e -> dialog.dispose());
-        cancelButton.addActionListener(e -> System.exit(0));
+        cancelButton.addActionListener(e -> {
+            try {
+                Main.endSystem();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         dialog.setVisible(true);
 
         if (!textField.getText().trim().isEmpty()) {
             return textField.getText().trim();
         } else {
-            System.exit(0);
+            Main.endSystem();
             return null;
         }
     }
@@ -74,7 +83,6 @@ public class Login extends JFrame {
         List<String> buffer = new ArrayList<>(); // Initialize an empty ArrayList
 
         JFrame frame = new JFrame("Virtual Keyboard");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTextField passwordField = new JTextField(20);
         passwordField.setEditable(false);
@@ -160,14 +168,19 @@ public class Login extends JFrame {
         });
 
         okButton.addActionListener(e -> dialog.dispose());
-        cancelButton.addActionListener(e -> System.exit(0));
+        cancelButton.addActionListener(e -> {
+            try {
+                Main.endSystem();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         dialog.setVisible(true);
 
         if (!textField.getText().trim().isEmpty()) {
             return textField.getText().trim();
         } else {
-            System.exit(0);
             return null;
         }
     }

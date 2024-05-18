@@ -8,7 +8,6 @@ import java.awt.*;
 public class MainMenu {
     public static void createAndShowGUI() {
         JFrame frame = new JFrame("Menu Principal");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridLayout(3, 1));
 
