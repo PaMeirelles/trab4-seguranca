@@ -1,14 +1,16 @@
 package View;
 
 import Model.*;
+import org.bouncycastle.util.test.FixedSecureRandom;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class MainMenu {
-    public static void createAndShowGUI() {
+    public static void createAndShowGUI(String login) throws SQLException {
+        DatabaseManager.log("5001", login);
         JFrame frame = new JFrame("Menu Principal");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridLayout(3, 1));
 
@@ -17,14 +19,33 @@ public class MainMenu {
         JButton sairButton = new JButton("3 - Sair do Sistema");
 
         cadastrarUsuarioButton.addActionListener(e -> {
-            RegistrationManager.register(false);
+            try {
+                DatabaseManager.log("5002", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
+                RegistrationManager.register(false, login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         consultarPastaButton.addActionListener(e -> {
+            try {
+                DatabaseManager.log("5003", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             displayConsultarArquivos();
         });
 
         sairButton.addActionListener(e -> {
+            try {
+                DatabaseManager.log("5004", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             telaDeSaida();
         });
 
@@ -43,7 +64,7 @@ public class MainMenu {
     private static void telaDeSaida(){
         // TODO
     }
-    public static void main(String[] args){
-        MainMenu.createAndShowGUI();
+    public static void main(String[] args) throws SQLException {
+        MainMenu.createAndShowGUI("fitos");
     }
 }

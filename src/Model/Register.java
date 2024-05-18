@@ -41,9 +41,14 @@ public class Register {
         this.password = password;
         this.confirmPassword = confirmPassword;
     }
-    private byte[] retrievePrivateKey() throws IOException {
-        Path path = Paths.get(pathPrivateKey);
-        return Files.readAllBytes(path);
+    private byte[] retrievePrivateKey() throws InvalidPrivateKeyException {
+        try{
+            Path path = Paths.get(pathPrivateKey);
+            return Files.readAllBytes(path);
+        }
+        catch (IOException ex){
+            throw new InvalidPrivateKeyException(InvalidPrivateKeyException.InvalidKeyType.INVALID_PATH);
+        }
     }
 
     private byte[] trimKey(byte[] keyBytes){
@@ -63,26 +68,36 @@ public class Register {
         return keyGen.generateKey();
     }
 
-    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
-        Key chave = genKey(secretPhrase);
-        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
-        cipher.init(Cipher.DECRYPT_MODE, chave);
-        byte[] chavePrivadaBytes;
-        if(fromFile){
-            chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
-        }
-        else{
-            chavePrivadaBytes = cipher.doFinal(bytes);
-        }
+    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, InvalidPrivateKeyException {
+        try {
+            Key chave = genKey(secretPhrase);
+            Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
+            cipher.init(Cipher.DECRYPT_MODE, chave);
+            byte[] chavePrivadaBytes;
+            if (fromFile) {
+                chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
+            } else {
+                chavePrivadaBytes = cipher.doFinal(bytes);
+            }
 
-        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
-        privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
+            KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
+            privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
+        }
+        catch (BadPaddingException ex){
+            throw new InvalidPrivateKeyException(InvalidPrivateKeyException.InvalidKeyType.INVALID_SECRET_PHRASE);
+        }
     }
 
-    private void fillCertificate() throws FileNotFoundException, CertificateException {
-        FileInputStream fis = new FileInputStream(this.pathCertificate);
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
-        this.certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
+    private void fillCertificate() throws CertificateException {
+        try {
+            FileInputStream fis = new FileInputStream(this.pathCertificate);
+            CertificateFactory certificateFactory = CertificateFactory.getInstance(Constants.CERTIFICATE_TYPE);
+            this.certificate = (X509Certificate) certificateFactory.generateCertificate(fis);
+        }
+        catch (FileNotFoundException e){
+            throw new CertificateException();
+        }
+
     }
 
     private byte[] genRandomBytes(int numBytes){
@@ -129,7 +144,7 @@ public class Register {
             prev = curr;
         }
         if(!this.validateKey()){
-            throw new InvalidPrivateKeyException();
+            throw new InvalidPrivateKeyException(InvalidPrivateKeyException.InvalidKeyType.INVALID_DIGITAL_SIGNATURE);
         }
     }
 
@@ -158,7 +173,7 @@ public class Register {
         return totpKey;
     }
 
-    public boolean validatesecretPhrase(String login, String secretPhrase) throws SQLException, CertificateException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {
+    public boolean validateSecretPhrase(String login, String secretPhrase) throws SQLException, CertificateException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException, InvalidPrivateKeyException {
         X509Certificate cert = DatabaseManager.retrieveCertificate(login);
         byte[] privateKeyBytes = DatabaseManager.retrieveprivateKeyBytes(login);
         this.secretPhrase = secretPhrase;
@@ -169,12 +184,13 @@ public class Register {
     }
 
     public boolean validateAdmin(String secretPhrase) throws Exception{
-        return validatesecretPhrase(getAdmLogin(), secretPhrase);
+        return validateSecretPhrase(getAdmLogin(), secretPhrase);
     }
 
-    public static void main(String[] args) throws IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public static void main(String[] args) throws Exception {
         Register r = new Register();
         r.fillForTest();
+        r.registerUser();
         String oi = r.generateTotpKey();
         System.out.println(oi);
     }

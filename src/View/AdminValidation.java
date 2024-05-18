@@ -1,15 +1,18 @@
 package View;
 
+import Controller.Main;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
 public class AdminValidation extends JFrame {
-    public static String secretPhraseInput() {
+    public static String secretPhraseInput() throws SQLException {
         JDialog dialog = new JDialog((Frame) null, "Insira a frase secreta do admnistrador", true);
         JTextField textField = new JTextField(20);
         JButton okButton = new JButton("OK");
@@ -40,7 +43,13 @@ public class AdminValidation extends JFrame {
         okButton.addActionListener(e -> dialog.dispose());
 
         // Define a ação do botão Cancelar para fechar a aplicação.
-        cancelButton.addActionListener(e -> System.exit(0));
+        cancelButton.addActionListener(e -> {
+            try {
+                Main.endSystem();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         dialog.setVisible(true);
 
@@ -48,7 +57,7 @@ public class AdminValidation extends JFrame {
         if (!textField.getText().trim().isEmpty()) {
             return textField.getText().trim();
         } else {
-            System.exit(0);
+            Main.endSystem();
             return null; // Esta linha não é realmente necessária, mas mantém o compilador feliz.
         }
     }
