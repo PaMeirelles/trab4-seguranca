@@ -13,5 +13,5 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 
 public interface RegistrationCallback {
-    void onSubmit(String certPath, String keyPath, String secretPhrase, String group, String password, String confirmPassword) throws PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, CertificateException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, IOException, InvalidKeyException, LoginNotUniqueException, InvalidPrivateKeyException, InvalidPasswordFormatException, InvalidKeySpecException;
+    String onSubmit(String certPath, String keyPath, String secretPhrase, String group, String password, String confirmPassword) throws PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, CertificateException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, IOException, InvalidKeyException, LoginNotUniqueException, InvalidPrivateKeyException, InvalidPasswordFormatException, InvalidKeySpecException;
 }

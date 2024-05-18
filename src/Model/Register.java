@@ -148,13 +148,14 @@ public class Register {
         return base32Encoder.toString(randomBytes);
     }
 
-    public void registerUser() throws InvalidPrivateKeyException, PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, InvalidPasswordFormatException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, LoginNotUniqueException, IOException, InvalidKeySpecException, CertificateException {
+    public String registerUser() throws InvalidPrivateKeyException, PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, InvalidPasswordFormatException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, LoginNotUniqueException, IOException, InvalidKeySpecException, CertificateException {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.totpKey = generateTotpKey();
         this.fillPrivateKey(retrievePrivateKey(), true);
         this.checkInfo();
         DatabaseManager.saveUser(totpKey, secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
+        return totpKey;
     }
 
     public boolean validatesecretPhrase(String login, String secretPhrase) throws SQLException, CertificateException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {

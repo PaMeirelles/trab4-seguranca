@@ -89,11 +89,11 @@ public class RegistrationForm extends JDialog {
                         throw new InvalidPrivateKeyException();
                     }
 
-                    // Show confirmation dialog
                     if (showConfirmationDialog(certificate)) {
-                        callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                        registrationSuccessful = true; // Registration was successful
-                        dispose(); // Close the dialog
+                        String totpKey = callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
+                        registrationSuccessful = true;
+                        dispose();
+                        showTotpKeyDialog(totpKey);
                     }
 
                 } catch (PasswordMismatchException ex) {
@@ -127,6 +127,10 @@ public class RegistrationForm extends JDialog {
         }
 
         setVisible(true);
+    }
+    private void showTotpKeyDialog(String totpKey) {
+        JOptionPane.showMessageDialog(this, "Your TOTP key is: " + totpKey, "TOTP Key",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private X509Certificate loadCertificate(String certPath) {
