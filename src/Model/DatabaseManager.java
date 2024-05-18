@@ -306,6 +306,40 @@ public class DatabaseManager {
 
     }
 
+    public static int getMidFromCode(String code) throws SQLException {
+        Connection conn = getConnection();
+        String query = "SELECT MID FROM mensagens WHERE code = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, code);
+        ResultSet resultSet = statement.executeQuery();
+        int mid = resultSet.getInt("MID");
+        conn.close();
+
+        return mid;
+    }
+
+    public static void log(String code, String field1, String field2) throws SQLException {
+        Connection connection = getConnection();
+        String insertSQL = "INSERT INTO registros (MID, campo 1, campo 2, time) VALUES (?, ?, ?, ?)";
+        PreparedStatement statement = connection.prepareStatement(insertSQL);
+
+        statement.setInt(1, getMidFromCode(code));
+        statement.setString(2, field1);
+        statement.setString(3, field2);
+        statement.setLong(4, System.currentTimeMillis());
+
+        statement.executeUpdate();
+        connection.close();
+    }
+
+    public static void log(String code, String field1) throws SQLException {
+        log(code, field1, null);
+    }
+
+    public static void log(String code) throws SQLException {
+        log(code, null);
+    }
+
     public static void main(String[] args) throws Exception{
         /* String login = "admin@inf1416.puc-rio.br";
         String key = getUserTotpKey(login);
