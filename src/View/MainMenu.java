@@ -12,7 +12,11 @@ public class MainMenu {
         DatabaseManager.log("5001", login);
         JFrame frame = new JFrame("Menu Principal");
 
-        JPanel panel = new JPanel(new GridLayout(3, 1));
+        int accessCount = DatabaseManager.getUserAccessCount(login);
+
+        JPanel panel = new JPanel(new GridLayout(4, 1));
+
+        JLabel accessCountLabel = new JLabel("Total de acessos do usuário: " + accessCount);
 
         JButton cadastrarUsuarioButton = new JButton("1 - Cadastrar um novo usuário");
         JButton consultarPastaButton = new JButton("2 - Consultar pasta de arquivos secretos do usuário");
@@ -49,6 +53,7 @@ public class MainMenu {
             telaDeSaida();
         });
 
+        panel.add(accessCountLabel);
         panel.add(cadastrarUsuarioButton);
         panel.add(consultarPastaButton);
         panel.add(sairButton);
