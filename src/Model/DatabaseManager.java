@@ -340,10 +340,27 @@ public class DatabaseManager {
         log(code, null);
     }
 
+    public static int getUserAccessCount(String login) throws SQLException{
+        Connection conn = getConnection();
+        int midRelevante = getMidFromCode("5001");
+        String query = "SELECT COUNT(*) AS count FROM registro WHERE MID = ? AND \"campo 1\" = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setInt(1, midRelevante);
+        statement.setString(2, login);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            int count = resultSet.getInt("count");
+            conn.close();
+            return count;
+        }
+        conn.close();
+        return 0;
+    }
+
     public static void main(String[] args) throws Exception{
         /* String login = "admin@inf1416.puc-rio.br";
         String key = getUserTotpKey(login);
         System.out.println(key);*/
-        fillMsgTable();
+        System.out.println(getUserAccessCount("fitos"));
     }
 }
