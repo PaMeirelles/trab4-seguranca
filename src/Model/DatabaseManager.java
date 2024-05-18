@@ -320,7 +320,7 @@ public class DatabaseManager {
 
     public static void log(String code, String field1, String field2) throws SQLException {
         Connection connection = getConnection();
-        String insertSQL = "INSERT INTO registros (MID, campo 1, campo 2, time) VALUES (?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO registro (MID, \"campo 1\", \"campo 2\", time) VALUES (?, ?, ?, ?)";
         PreparedStatement statement = connection.prepareStatement(insertSQL);
 
         statement.setInt(1, getMidFromCode(code));
