@@ -7,6 +7,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+
+import static Model.CertificateInfo.extractCommonName;
+import static Model.CertificateInfo.extractEmail;
 
 public class RegistrationForm extends JDialog {
     private JTextField textFieldCertPath;
@@ -21,7 +29,7 @@ public class RegistrationForm extends JDialog {
     public RegistrationForm(Frame owner, boolean isFirstAccess, RegistrationCallback callback) {
         super(owner, "Cadastro de Usuário", true); // true for modal
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setSize(400, 300);
+        setSize(600, 400);
         setLayout(new GridLayout(8, 2, 10, 10));
 
         JLabel labelCertPath = new JLabel("Caminho do arquivo do certificado digital:");
@@ -69,9 +77,25 @@ public class RegistrationForm extends JDialog {
                     String group = (String) comboBoxGroup.getSelectedItem();
                     String password = new String(passwordField.getPassword());
                     String confirmPassword = new String(confirmPasswordField.getPassword());
-                    callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
-                    registrationSuccessful = true; // Registration was successful
-                    dispose(); // Close the dialog
+
+                    // Check if passwords match
+                    if (!password.equals(confirmPassword)) {
+                        throw new PasswordMismatchException();
+                    }
+
+                    // Extract certificate details
+                    X509Certificate certificate = loadCertificate(certPath);
+                    if (certificate == null) {
+                        throw new InvalidPrivateKeyException();
+                    }
+
+                    // Show confirmation dialog
+                    if (showConfirmationDialog(certificate)) {
+                        callback.onSubmit(certPath, keyPath, secretPhrase, group, password, confirmPassword);
+                        registrationSuccessful = true; // Registration was successful
+                        dispose(); // Close the dialog
+                    }
+
                 } catch (PasswordMismatchException ex) {
                     JOptionPane.showMessageDialog(null, "Senhas não são iguais");
                 } catch (InvalidPasswordFormatException ex) {
@@ -98,11 +122,36 @@ public class RegistrationForm extends JDialog {
             }
         });
 
-        if(!isFirstAccess){
+        if (!isFirstAccess) {
             add(buttonGoBack);
         }
 
         setVisible(true);
+    }
+
+    private X509Certificate loadCertificate(String certPath) {
+        try (InputStream inStream = new FileInputStream(certPath)) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) cf.generateCertificate(inStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean showConfirmationDialog(X509Certificate certificate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        StringBuilder certDetails = new StringBuilder();
+        certDetails.append("Versão: ").append(certificate.getVersion()).append("\n");
+        certDetails.append("Série: ").append(certificate.getSerialNumber().toString(16)).append("\n");
+        certDetails.append("Validade: ").append(dateFormat.format(certificate.getNotBefore())).append(" - ").append(dateFormat.format(certificate.getNotAfter())).append("\n");
+        certDetails.append("Tipo de Assinatura: ").append(certificate.getSigAlgName()).append("\n");
+        certDetails.append("Emissor: ").append(extractCommonName(certificate.getIssuerX500Principal().getName())).append("\n");
+        certDetails.append("Sujeito: ").append(extractCommonName(certificate.getSubjectX500Principal().getName())).append("\n");
+        certDetails.append("E-mail: ").append(extractEmail(certificate.getSubjectX500Principal().getName())).append("\n");
+
+        int result = JOptionPane.showConfirmDialog(this, certDetails.toString(), "Confirmação do Certificado Digital", JOptionPane.OK_CANCEL_OPTION);
+        return result == JOptionPane.OK_OPTION;
     }
 
     public boolean isRegistrationSuccessful() {

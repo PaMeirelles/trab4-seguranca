@@ -157,7 +157,7 @@ public class Register {
         DatabaseManager.saveUser(totpKey, secretPhrase, certificateInfo.email, this.password, this.privateKey, this.certificate, this.certificateInfo.subjectFriendlyName, this.group);
     }
 
-    public boolean validatesecretPhrase(String login, String secretPhrase) throws Exception {
+    public boolean validatesecretPhrase(String login, String secretPhrase) throws SQLException, CertificateException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeySpecException, InvalidKeyException {
         X509Certificate cert = DatabaseManager.retrieveCertificate(login);
         byte[] privateKeyBytes = DatabaseManager.retrieveprivateKeyBytes(login);
         this.secretPhrase = secretPhrase;
