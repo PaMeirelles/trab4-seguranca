@@ -3,7 +3,8 @@ package Model;
 public class Constants {
     public static final String KEY_GENERATOR_ALGO = "AES";
     public static final Integer KEY_SIZE = 256;
-    public static final String CYPHER_TRANSFORMATION = "AES/ECB/PKCS5Padding";
+    public static final String RSA_CYPHER = "RSA/ECB/PKCS1Padding";
+    public static final String AES_CYPHER = "AES/ECB/PKCS5Padding";
     public static final String KEY_ALGO = "RSA";
     public static final Integer TEST_ARRAY_SIZE = 496;
     public static final String DIGEST_ALGO = "SHA-256";
@@ -16,5 +17,5 @@ public class Constants {
     public static final long INTERVAL_IN_MILISSECONDS = 30000;
     public static final String HMACSHA1 = "HmacSHA1";
     public static final long BLOCK_TIME = 1000 * 60 * 2;
-    public static final String DIGITAL_SIGNATURE_ALGO = "SHA256withRSA";
+    public static final String DIGITAL_SIGNATURE_ALGO = "SHA1withRSA";
 }

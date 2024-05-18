@@ -34,7 +34,7 @@ public class VaultHandler {
         keyGen.init(Constants.KEY_SIZE, rand);
         Key chave = keyGen.generateKey();
 
-        cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, chave);
         return decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
 
@@ -47,15 +47,20 @@ public class VaultHandler {
         }
     }
 
-    private static boolean checkIntegrity(String folder, String name, PublicKey key, byte[] content) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+    private static byte[] fileToByte(String folder, String name) throws IOException {
         String path = folder + File.separator + name;
         File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        byte[] bytes = new byte[(int) file.length()];
+        fis.read(bytes);
+        return bytes;
+    }
+
+    private static boolean checkIntegrity(String folder, String name, PublicKey key, byte[] content) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         Signature signature = Signature.getInstance(Constants.DIGITAL_SIGNATURE_ALGO);
         signature.initVerify(key);
         signature.update(content);
-        FileInputStream fis = new FileInputStream(file);
-        byte[] hash = new byte[(int) file.length()];
-        fis.read(hash);
+        byte[] hash = fileToByte(folder, name);
         return signature.verify(hash);
     }
 
@@ -125,6 +130,6 @@ public class VaultHandler {
         //r.fillInfo("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-x509.crt", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-pkcs8-aes.pem", "user01", "USER", "13052024", "13052024");
         r.validatesecretPhrase("admin@inf1416.puc-rio.br", "admin");
         List<SecretFile> files = decodeIndex( "admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
-        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(1), r.privateKey, r.certificateInfo.publicKey);
+        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(0), r.privateKey, r.certificateInfo.publicKey);
     }
 }
