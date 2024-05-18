@@ -49,21 +49,26 @@ public class Main {
         }
     }
 
-    private static void startLoginProcess() {
+    private static void startLoginProcess() throws SQLException {
+        log("2001");
         try {
             while (true) {
                 Main.login = Login.login();
                 boolean loginExists = LoginModel.loginStep1(Main.login);
                 if (loginExists) {
                     if(DatabaseManager.userIsBlocked(login)){
+                        log("2004", login);
                         JOptionPane.showMessageDialog(null, "Seu acesso está bloqueado.");
                     }
                     else {
+                        log("2003", login);
                         break;
                     }
                 } else {
+                    log("2005");
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
+                log("2002");
             }
         } catch (Exception e) {
             e.printStackTrace();
