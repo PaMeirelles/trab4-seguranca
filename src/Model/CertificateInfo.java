@@ -33,7 +33,7 @@ public class CertificateInfo {
 
     }
 
-    private String extractCommonName(String name) {
+    public static String extractCommonName(String name) {
         X500Name x500Name = new X500Name(name);
         RDN[] rdns = x500Name.getRDNs(BCStyle.CN);
         if (rdns.length > 0) {
@@ -42,7 +42,7 @@ public class CertificateInfo {
         return null;
     }
 
-    private String extractEmail(String name) {
+    public static String extractEmail(String name) {
         X500Name x500Name = new X500Name(name);
         RDN[] rdns = x500Name.getRDNs(BCStyle.E);
         if (rdns.length > 0) {
