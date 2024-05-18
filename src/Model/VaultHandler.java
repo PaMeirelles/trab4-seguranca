@@ -34,7 +34,7 @@ public class VaultHandler {
         keyGen.init(Constants.KEY_SIZE, rand);
         Key chave = keyGen.generateKey();
 
-        cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, chave);
         return decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
 
@@ -47,9 +47,21 @@ public class VaultHandler {
         }
     }
 
-    private static boolean checkIntegrity(String folder, String name, Key key){
-        // TODO
-        return true;
+    private static byte[] fileToByte(String folder, String name) throws IOException {
+        String path = folder + File.separator + name;
+        File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        byte[] bytes = new byte[(int) file.length()];
+        fis.read(bytes);
+        return bytes;
+    }
+
+    private static boolean checkIntegrity(String folder, String name, PublicKey key, byte[] content) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+        Signature signature = Signature.getInstance(Constants.DIGITAL_SIGNATURE_ALGO);
+        signature.initVerify(key);
+        signature.update(content);
+        byte[] hash = fileToByte(folder, name);
+        return signature.verify(hash);
     }
 
     private static List<SecretFile> parseSecretFiles(String input) {
@@ -89,29 +101,35 @@ public class VaultHandler {
         // TODO: Tratar adequadamente os casos de erro
         Register r = new Register();
         boolean phraseValid = r.validateAdmin(secretPhrase);
-        boolean integrity = checkIntegrity(folderPath, "index.asd", r.privateKey);
-        if (!phraseValid || !integrity){
+        if (!phraseValid){
             throw new Exception();
         }
         byte[] indexInfo = decryptFile(folderPath, r.privateKey, "index");
+        boolean integrity = checkIntegrity(folderPath, "index.asd", r.certificateInfo.publicKey, indexInfo);
+        if (!integrity){
+            throw new Exception();
+        }
         return parseSecretFiles(new String(indexInfo));
     }
 
-    public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey key) throws Exception {
-        boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", key);
+    public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey privateKey, PublicKey publicKey) throws Exception {
         // TODO
-        if(!Objects.equals(loggedUser, sf.owner) || !integrity){
+        if(!Objects.equals(loggedUser, sf.owner)){
             throw new Exception();
         }
-        byte[] content = decryptFile(pathFolder, key, sf.fakeName);
+        byte[] content = decryptFile(pathFolder, privateKey, sf.fakeName);
+        boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", publicKey, content);
+        if(!integrity){
+            throw new Exception();
+        }
         writeToFile(content, pathFolder, sf.trueName);
     }
 
     public static void main(String[] args) throws Exception {
         Register r = new Register();
         //r.fillInfo("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-x509.crt", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-pkcs8-aes.pem", "user01", "USER", "13052024", "13052024");
-        r.validatesecretPhrase("user01@inf1416.puc-rio.br", "user01");
+        r.validatesecretPhrase("admin@inf1416.puc-rio.br", "admin");
         List<SecretFile> files = decodeIndex( "admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
-        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "user01@inf1416.puc-rio.br", files.get(1), r.privateKey);
+        decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(0), r.privateKey, r.certificateInfo.publicKey);
     }
 }

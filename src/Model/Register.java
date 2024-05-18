@@ -65,7 +65,7 @@ public class Register {
 
     private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
         Key chave = genKey(secretPhrase);
-        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, chave);
         byte[] chavePrivadaBytes;
         if(fromFile){
@@ -98,7 +98,7 @@ public class Register {
         MessageDigest md = MessageDigest.getInstance(Constants.DIGEST_ALGO);
         byte[] hashedData = md.digest(data);
 
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        Cipher cipher = Cipher.getInstance(Constants.RSA_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
         byte[] digitalSignature = cipher.doFinal(hashedData);
 

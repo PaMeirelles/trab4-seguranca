@@ -145,14 +145,14 @@ public class DatabaseManager {
         KeyGenerator keyGen = KeyGenerator.getInstance(Constants.KEY_GENERATOR_ALGO);
         keyGen.init(Constants.KEY_SIZE, rand);
         Key chave = keyGen.generateKey();
-        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, chave);
         return cipher.doFinal(privateKey.getEncoded());
     }
 
     private static String prepareTotpKey(String password, String totpKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Key chave = Register.genKey(password);
-        Cipher cipher = Cipher.getInstance(Constants.CYPHER_TRANSFORMATION);;
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);;
         cipher.init(Cipher.ENCRYPT_MODE, chave);
         byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
         Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
