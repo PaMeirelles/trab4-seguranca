@@ -199,9 +199,6 @@ public class MainMenu {
         buttonPanel.revalidate();
         buttonPanel.repaint();
     }
-    private static void telaDeSaida(String login, String adminSecretPhrase){
-        // TODO
-    }
 
     public static void main(String[] args) throws SQLException {
         MainMenu.createAndShowGUI("admin@inf1416.puc-rio.br", "admin");

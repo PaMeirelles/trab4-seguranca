@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 
+import static Controller.Main.endSystem;
+
 public class ExitScreen {
     public static void createAndShowGUI(String login, Group group) throws SQLException {
         JFrame frame = new JFrame("Tela de Saida");
@@ -56,7 +58,11 @@ public class ExitScreen {
         });
 
         endSys.addActionListener(e -> {
-            close_sys();
+            try {
+                close_sys();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         backToMenu.addActionListener(e -> {
@@ -79,7 +85,7 @@ public class ExitScreen {
     private static void close_session(){
         // TODO
     }
-    private static void close_sys(){
-        // TODO
+    private static void close_sys() throws SQLException {
+        endSystem();
     }
 }
