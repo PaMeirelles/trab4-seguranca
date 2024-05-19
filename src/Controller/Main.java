@@ -90,9 +90,10 @@ public class Main {
             List<String> passwords = Collections.emptyList();
             while (attemptsRemaining > 0) {
                 passwords = Login.collectPassword();
-                boolean passwordCorrect = LoginModel.loginStep2(Main.login, passwords);
-                if (passwordCorrect) {
+                String pass = LoginModel.loginStep2(Main.login, passwords);
+                if (pass != null) {
                     log("3003", login);
+                    password = pass;
                     break;
                 } else {
                     attemptsRemaining -= 1;

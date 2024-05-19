@@ -237,11 +237,10 @@ public class DatabaseManager {
         conn.close();
 
         Key chave = Register.genKey(password);
-        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);;
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, chave);
-        byte[] bytes = cipher.doFinal(code.getBytes());
-        Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
-        return base32Encoder.toString(bytes);
+        Base32 base32Decoder = new Base32(Base32.Alphabet.BASE32, true, false);
+        return new String(cipher.doFinal(base32Decoder.fromString(code)));
     }
 
     private static void fillMsgTable() throws SQLException {
@@ -357,7 +356,7 @@ public class DatabaseManager {
 
     public static int getUserAccessCount(String login) throws SQLException{
         Connection conn = getConnection();
-        int midRelevante = getMidFromCode("5001");
+        int midRelevante = getMidFromCode("4003");
         String query = "SELECT COUNT(*) AS count FROM registro WHERE MID = ? AND \"campo 1\" = ?";
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setInt(1, midRelevante);
