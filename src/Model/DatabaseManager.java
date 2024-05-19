@@ -363,7 +363,6 @@ public class DatabaseManager {
     }
     public static String getUserName(String login) throws SQLException {
         Connection conn = getConnection();
-        int midRelevante = getMidFromCode("5001");
         String query = "SELECT friendly_name FROM usuarios WHERE login = ?";
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setString(1, login);
@@ -378,7 +377,6 @@ public class DatabaseManager {
     }
     public static int getUserGroup(String login) throws SQLException {
         Connection conn = getConnection();
-        int midRelevante = getMidFromCode("5001");
         String query = "SELECT group_id FROM usuarios WHERE login = ?";
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setString(1, login);
@@ -387,19 +385,6 @@ public class DatabaseManager {
             int group = resultSet.getInt("group_id");
             conn.close();
             return group;
-        }
-        conn.close();
-        return 0;
-    }
-    public static int getUserCount(String login) throws SQLException {
-        Connection conn = getConnection();
-        int midRelevante = getMidFromCode("5001");
-        String query = "SELECT COUNT(*) AS count FROM usuarios";
-        ResultSet resultSet = conn.prepareStatement(query).executeQuery();
-        if (resultSet.next()) {
-            int count = resultSet.getInt("count");
-            conn.close();
-            return count;
         }
         conn.close();
         return 0;
