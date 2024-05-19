@@ -27,7 +27,7 @@ public class Main {
         //RegistrationManager.register(true, login);
         //MainMenu.createAndShowGUI(login, frase_secreta);
         //ExitScreen.createAndShowGUI(login, Group.ADMIN);
-
+        //MainMenu.createAndShowGUI("ca@grad.inf.puc-rio.br", "admin");
          if (isFirstAccess) {
              while(isFirstAccess){
                  RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);

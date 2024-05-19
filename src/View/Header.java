@@ -8,8 +8,6 @@ import java.sql.*;
 import java.awt.*;
 
 public class Header extends JPanel {
-    
-
     public Header(String login, Group group)throws SQLException{
         setLayout(new GridLayout(3, 1, 10, 5));
         String name;
