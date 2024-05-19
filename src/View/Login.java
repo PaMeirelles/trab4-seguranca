@@ -87,18 +87,21 @@ public class Login extends JFrame {
         JTextField passwordField = new JTextField(20);
         passwordField.setEditable(false);
 
-        JPanel keyboardPanel = new JPanel(new GridLayout(2, 5));
+        Font f = new Font("Arial", Font.PLAIN, 15);
+
+        JPanel keyboardPanel = new JPanel(new GridLayout(2, 5, 5, 5));
         final List<String>[] buttonLabels = new List[]{generateLabels()};
 
         for (String label : buttonLabels[0]) {
             JButton button = new JButton(label);
+            button.setFont(f);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     String command = e.getActionCommand();
                     if (command.equals("Clear")) {
                         possiblePasswords[0].clear();
-
+                        passwordField.setText("");
                     } else if (command.equals("Enter")) {
                         frame.dispose(); // Close the window when Enter is pressed
                     } else {
