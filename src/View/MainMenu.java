@@ -2,9 +2,7 @@ package View;
 
 import Model.*;
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableCellEditor;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -102,6 +100,11 @@ public class MainMenu {
         JScrollPane tableScrollPane = new JScrollPane(table);
         frame.getContentPane().add(BorderLayout.CENTER, tableScrollPane);
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
+        frame.getContentPane().add(BorderLayout.EAST, buttonScrollPane);
+
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -111,10 +114,7 @@ public class MainMenu {
                     List<SecretFile> secretFiles = decodeIndex(secretPhrase, folderPath);
                     PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                     PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
-                    SecretFileTableModel tableModel = new SecretFileTableModel(secretFiles, folderPath, publicKey, privateKey, login);
-                    table.setModel(tableModel);
-                    table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-                    table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox()));
+                    getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
@@ -125,148 +125,33 @@ public class MainMenu {
         frame.setVisible(true);
     }
 
-    static class SecretFileTableModel extends AbstractTableModel {
-        private final String[] columnNames = {"Fake Name", "True Name", "Owner", "Group", "Actions"};
-        private final List<SecretFile> secretFiles;
-        private final String folderPath;
-        private final PublicKey publicKey;
-        private final PrivateKey privateKey;
-        private final String loggedUser;
+    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files, JPanel buttonPanel) {
+        String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
-        SecretFileTableModel(List<SecretFile> secretFiles, String folderPath, PublicKey publicKey, PrivateKey privateKey, String loggedUser) {
-            this.secretFiles = secretFiles;
-            this.folderPath = folderPath;
-            this.publicKey = publicKey;
-            this.privateKey = privateKey;
-            this.loggedUser = loggedUser;
-        }
+        buttonPanel.removeAll();  // Clear any existing buttons
 
-        @Override
-        public int getRowCount() {
-            return secretFiles.size();
-        }
+        for (SecretFile file : files) {
+            Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString()};
+            model.addRow(rowData);
 
-        @Override
-        public int getColumnCount() {
-            return columnNames.length;
-        }
+            JButton button = new JButton("Decrypt" + file.fakeName);
+            buttonPanel.add(button);
 
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            SecretFile sf = secretFiles.get(rowIndex);
-            switch (columnIndex) {
-                case 0:
-                    return sf.fakeName;
-                case 1:
-                    return sf.trueName;
-                case 2:
-                    return sf.owner;
-                case 3:
-                    return sf.group;
-                case 4:
-                    JButton decryptButton = new JButton("Decrypt");
-                    decryptButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            try {
-                                decodeFile(folderPath, loggedUser, sf, privateKey, publicKey);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
-                            }
-                        }
-                    });
-                    return decryptButton;
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 4;
-        }
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            return columnIndex == 4 ? JButton.class : String.class;
-        }
-
-        @Override
-        public String getColumnName(int columnIndex) {
-            return columnNames[columnIndex];
-        }
-    }
-
-    static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            if (isSelected) {
-                setForeground(table.getSelectionForeground());
-                setBackground(table.getSelectionBackground());
-            } else {
-                setForeground(table.getForeground());
-                setBackground(UIManager.getColor("Button.background"));
-            }
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
-
-    static class ButtonEditor extends DefaultCellEditor {
-        private String label;
-        private JButton button;
-        private boolean isPushed;
-
-        public ButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
             button.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
+                    try {
+                        decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             });
         }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            if (isSelected) {
-                button.setForeground(table.getSelectionForeground());
-                button.setBackground(table.getSelectionBackground());
-            } else {
-                button.setForeground(table.getForeground());
-                button.setBackground(table.getBackground());
-            }
-            label = (value == null) ? "" : value.toString();
-            button.setText(label);
-            isPushed = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                // the action is handled in the model listener
-            }
-            isPushed = false;
-            return label;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
-        }
-
-        @Override
-        protected void fireEditingStopped() {
-            super.fireEditingStopped();
-        }
+        table.setModel(model);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
     }
 
     private static void telaDeSaida() {

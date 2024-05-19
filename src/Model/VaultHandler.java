@@ -83,7 +83,7 @@ public class VaultHandler {
             secretFile.trueName = parts[1];
             secretFile.owner = parts[2];
             Group g;
-            if (Objects.equals(parts[3], "administrator")){
+            if (Objects.equals(parts[3], "administrador")){
                 g = Group.ADMIN;
             }
             else {
