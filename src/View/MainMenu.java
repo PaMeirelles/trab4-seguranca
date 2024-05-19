@@ -10,6 +10,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
 import java.sql.SQLException;
+import Controller.*;
+
 
 import static Model.DatabaseManager.getUserGroup;
 import static Model.VaultHandler.decodeFile;
@@ -28,6 +30,7 @@ public class MainMenu {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(15, 5, 15, 5);
+        
         Group group = getUserGroup(login);
         Header head = new Header(login, group);
         gbc.gridy = 0;
@@ -83,7 +86,7 @@ public class MainMenu {
                 throw new RuntimeException(ex);
             }
             try {
-                telaDeSaida(login);
+                ExitScreen.createAndShowGUI(login, group);
                 frame.dispose();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
@@ -99,10 +102,10 @@ public class MainMenu {
         frame.add(menu, gbc);
         frame.setVisible(true);
     }
-    private static void displayConsultarArquivos(){
+    private static void displayConsultarArquivos(String login, String adminSecretPhrase){
         // TODO
     }
-    private static void telaDeSaida(){
+    private static void telaDeSaida(String login, String adminSecretPhrase){
         // TODO
     }
 

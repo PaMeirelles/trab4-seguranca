@@ -1,6 +1,6 @@
 package View;
 
-import Controller.RegistrationCallback;
+import Controller.*;
 import Model.*;
 
 import javax.swing.*;
@@ -183,7 +183,7 @@ public class RegistrationForm extends JDialog{
                 }
                 try {
                     dispose();
-                    MainMenu.createAndShowGUI(login);
+                    MainMenu.createAndShowGUI(login, Main.frase_secreta);
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 } 
