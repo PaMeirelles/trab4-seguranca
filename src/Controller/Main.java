@@ -18,6 +18,7 @@ import Model.Group;
 public class Main {
     public static String frase_secreta = null;
     public static String login = null;
+    public static String password = null;
     public static void main(String[] args) throws SQLException {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
@@ -25,22 +26,22 @@ public class Main {
         //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
         //MainMenu.createAndShowGUI(login, frase_secreta);
-        ExitScreen.createAndShowGUI(login, Group.ADMIN);
+        //ExitScreen.createAndShowGUI(login, Group.ADMIN);
 
-        // if (isFirstAccess) {
-        //     while(isFirstAccess){
-        //         RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-        //         if(r == RegistrationManager.RegistrationResult.SUCCESS){
-        //             break;
-        //         }
-        //     }
-        // }
-        // startAuthenticationProcess();
-        // startLoginProcess();
-        // startPasswordProcess();
-        // startTotpProcess();
-        // log("1003", login);
-        // MainMenu.createAndShowGUI(login, frase_secreta);
+         if (isFirstAccess) {
+             while(isFirstAccess){
+                 RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
+                     break;
+                }
+            }
+         }
+         startAuthenticationProcess();
+         startLoginProcess();
+         startPasswordProcess();
+         startTotpProcess();
+         log("1003", login);
+         MainMenu.createAndShowGUI(login, frase_secreta);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();
@@ -127,9 +128,10 @@ public class Main {
             String totpCode;
             while (attemptsRemaining > 0) {
                 totpCode = Login.collectTOTPCode();
-                boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login), totpCode);
+                boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login, password), totpCode);
                 if(codeCorrect){
                     log("4003", login);
+                    password = null;
                     break;
                 }
                 else {
