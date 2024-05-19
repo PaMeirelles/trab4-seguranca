@@ -24,20 +24,20 @@ public class Main {
         //MainMenu.createAndShowGUI(login);
         ExitScreen.createAndShowGUI(login);
 
-        // if (isFirstAccess) {
-        //     while(isFirstAccess){
-        //         RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-        //         if(r == RegistrationManager.RegistrationResult.SUCCESS){
-        //             break;
-        //         }
-        //     }
-        // }
-        // startAuthenticationProcess();
-        // startLoginProcess();
-        // startPasswordProcess();
-        // startTotpProcess();
-        // log("1003", login);
-        // MainMenu.createAndShowGUI(login);
+        if (isFirstAccess) {
+            while(isFirstAccess){
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+                if(r == RegistrationManager.RegistrationResult.SUCCESS){
+                    break;
+                }
+            }
+        }
+        startAuthenticationProcess();
+        startLoginProcess();
+        startPasswordProcess();
+        startTotpProcess();
+        log("1003", login);
+        MainMenu.createAndShowGUI(login, frase_secreta);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();

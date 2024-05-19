@@ -51,7 +51,7 @@ public class Register {
         }
     }
 
-    private byte[] trimKey(byte[] keyBytes){
+    private static byte[] trimKey(byte[] keyBytes){
         String chavePrivadaBase64 = new String(keyBytes, StandardCharsets.UTF_8);
         chavePrivadaBase64 = chavePrivadaBase64.replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "").trim();
@@ -68,20 +68,24 @@ public class Register {
         return keyGen.generateKey();
     }
 
+    public static PrivateKey genPrivateKey(byte[] privateKeyBytes, boolean fromFile, String secretPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
+        Key chave = genKey(secretPhrase);
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
+        cipher.init(Cipher.DECRYPT_MODE, chave);
+        byte[] chavePrivadaBytes;
+        if (fromFile) {
+            chavePrivadaBytes = trimKey(cipher.doFinal(privateKeyBytes));
+        } else {
+            chavePrivadaBytes = cipher.doFinal(privateKeyBytes);
+        }
+
+        KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
+        return factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
+    }
+
     private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, InvalidPrivateKeyException {
         try {
-            Key chave = genKey(secretPhrase);
-            Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
-            cipher.init(Cipher.DECRYPT_MODE, chave);
-            byte[] chavePrivadaBytes;
-            if (fromFile) {
-                chavePrivadaBytes = trimKey(cipher.doFinal(bytes));
-            } else {
-                chavePrivadaBytes = cipher.doFinal(bytes);
-            }
-
-            KeyFactory factory = KeyFactory.getInstance(Constants.KEY_ALGO);
-            privateKey = factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
+            privateKey = genPrivateKey(bytes, fromFile, secretPhrase);
         }
         catch (BadPaddingException ex){
             throw new InvalidPrivateKeyException(InvalidPrivateKeyException.InvalidKeyType.INVALID_SECRET_PHRASE);
