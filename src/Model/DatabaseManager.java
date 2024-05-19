@@ -226,7 +226,7 @@ public class DatabaseManager {
         return "admin@inf1416.puc-rio.br";
     }
 
-    public static String getUserTotpKey(String login) throws SQLException {
+    public static String getUserTotpKey(String login, String password) throws SQLException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Connection conn = getConnection();
         String query = "SELECT totp_key FROM KeyByLogin WHERE login = ?";
         PreparedStatement statement = conn.prepareStatement(query);
@@ -236,7 +236,11 @@ public class DatabaseManager {
         String code = resultSet.getString("totp_key");
         conn.close();
 
-        return code;
+        Key chave = Register.genKey(password);
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
+        cipher.init(Cipher.DECRYPT_MODE, chave);
+        Base32 base32Decoder = new Base32(Base32.Alphabet.BASE32, true, false);
+        return new String(cipher.doFinal(base32Decoder.fromString(code)));
     }
 
     private static void fillMsgTable() throws SQLException {
@@ -352,7 +356,7 @@ public class DatabaseManager {
 
     public static int getUserAccessCount(String login) throws SQLException{
         Connection conn = getConnection();
-        int midRelevante = getMidFromCode("5001");
+        int midRelevante = getMidFromCode("4003");
         String query = "SELECT COUNT(*) AS count FROM registro WHERE MID = ? AND \"campo 1\" = ?";
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setInt(1, midRelevante);

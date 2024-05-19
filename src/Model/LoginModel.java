@@ -16,14 +16,14 @@ public class LoginModel {
     public static boolean loginStep1(String login) throws Exception {
         return DatabaseManager.loginIsNotUnique(login);
     }
-    public static boolean loginStep2(String login, List<String> possiblePasswords) throws SQLException {
+    public static String loginStep2(String login, List<String> possiblePasswords) throws SQLException {
         String dbPass = DatabaseManager.retrievePassword(login);
         for(String password: possiblePasswords){
             if (DatabaseManager.checkPassword(password, dbPass)){
-                return true;
+                return password;
             }
         }
-        return false;
+        return null;
     }
 
     public static boolean loginStep3(String userKeyBase32, String digits) throws NoSuchAlgorithmException, InvalidKeyException {

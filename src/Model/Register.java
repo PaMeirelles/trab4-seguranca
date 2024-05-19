@@ -1,6 +1,8 @@
 package Model;
 
 
+import com.sun.istack.internal.NotNull;
+
 import javax.crypto.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,7 +61,7 @@ public class Register {
         return Base64.getDecoder().decode(chavePrivadaBase64);
     }
 
-    public static Key genKey(String seed) throws NoSuchAlgorithmException {
+    public static Key genKey(@NotNull String seed) throws NoSuchAlgorithmException {
         SecureRandom rand = SecureRandom.getInstance(Constants.SECURE_RANDOM_ALGO);
         rand.setSeed(seed.getBytes());
 

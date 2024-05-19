@@ -112,6 +112,6 @@ public class MainMenu {
     }
 
     public static void main(String[] args) throws SQLException {
-        MainMenu.createAndShowGUI("user01@inf1416.puc-rio.br", "admin");
+        MainMenu.createAndShowGUI("admin@inf1416.puc-rio.br", "admin");
     }
 }
