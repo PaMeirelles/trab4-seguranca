@@ -3,12 +3,15 @@ package Model;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 
 import javax.crypto.*;
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.sql.*;
 import java.util.Base64;
+import javax.swing.table.DefaultTableModel;
 
 public class DatabaseManager {
     public static boolean isFirstAccess() throws SQLException {
@@ -395,10 +398,67 @@ public class DatabaseManager {
         return null;
     }
 
+    public static Runnable logViewer() {
+        JFrame frame = new JFrame();
+        frame.setTitle("Log View");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        // Create a table model with column names
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Time");
+        model.addColumn("Message");
+
+
+        // Create the JTable
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // Load data from the database
+        loadData(model);
+
+        frame.setVisible(true);
+        return null;
+    }
+
+    private static void loadData(DefaultTableModel model) {
+        try (Connection conn = getConnection()) {
+            String query = "SELECT r.Time, m.Mensagem, r.`Campo 1`, r.`Campo 2` " +
+                    "FROM registro r " +
+                    "JOIN mensagens m ON r.MID = m.MID " +
+                    "ORDER BY r.Time";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                long time = rs.getLong("Time");
+                String message = rs.getString("Mensagem");
+                String campo1 = rs.getString("Campo 1");
+                String campo2 = rs.getString("Campo 2");
+
+                // Replace placeholders in the message text
+                if (campo1 != null) {
+                    message = message.replace("<login_name>", campo1).replace("<arq_name>", campo1);
+                }
+                if (campo2 != null) {
+                    message = message.replace("<login_name>", campo2).replace("<arq_name>", campo2);
+                }
+
+                model.addRow(new Object[]{time, message});
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws Exception{
         /* String login = "admin@inf1416.puc-rio.br";
         String key = getUserTotpKey(login);
         System.out.println(key);*/
+        SwingUtilities.invokeLater(logViewer());
         System.out.println(getUserAccessCount("fitos"));
     }
 }
