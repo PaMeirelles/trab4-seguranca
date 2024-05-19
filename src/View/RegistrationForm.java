@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.io.FileInputStream;
@@ -207,11 +208,15 @@ public class RegistrationForm extends JDialog{
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private X509Certificate loadCertificate(String certPath) {
+    private X509Certificate loadCertificate(String certPath) throws CertificatePathNotFoundException {
         try (InputStream inStream = new FileInputStream(certPath)) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(inStream);
-        } catch (Exception e) {
+        }
+        catch (FileNotFoundException ex){
+            throw new CertificatePathNotFoundException();
+        }
+        catch (Exception e) {
             e.printStackTrace();
             return null;
         }
