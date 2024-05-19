@@ -36,7 +36,7 @@ public class Main {
         startPasswordProcess();
         startTotpProcess();
         log("1003", login);
-        MainMenu.createAndShowGUI(login);
+        MainMenu.createAndShowGUI(login, frase_secreta);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();
