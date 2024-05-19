@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static Model.DatabaseManager.log;
+import Model.Group;
+
+
 
 public class Main {
     public static String frase_secreta = null;
@@ -21,23 +24,23 @@ public class Main {
         
         //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
-        //MainMenu.createAndShowGUI(login);
-        ExitScreen.createAndShowGUI(login);
+        //MainMenu.createAndShowGUI(login, frase_secreta);
+        ExitScreen.createAndShowGUI(login, Group.ADMIN);
 
-        if (isFirstAccess) {
-            while(isFirstAccess){
-                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-                if(r == RegistrationManager.RegistrationResult.SUCCESS){
-                    break;
-                }
-            }
-        }
-        startAuthenticationProcess();
-        startLoginProcess();
-        startPasswordProcess();
-        startTotpProcess();
-        log("1003", login);
-        MainMenu.createAndShowGUI(login, frase_secreta);
+        // if (isFirstAccess) {
+        //     while(isFirstAccess){
+        //         RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+        //         if(r == RegistrationManager.RegistrationResult.SUCCESS){
+        //             break;
+        //         }
+        //     }
+        // }
+        // startAuthenticationProcess();
+        // startLoginProcess();
+        // startPasswordProcess();
+        // startTotpProcess();
+        // log("1003", login);
+        // MainMenu.createAndShowGUI(login, frase_secreta);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();

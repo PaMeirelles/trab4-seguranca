@@ -1,6 +1,7 @@
 package View;
 
 import Model.*;
+import Controller.*;
 import org.bouncycastle.util.test.FixedSecureRandom;
 
 import javax.swing.*;
@@ -8,7 +9,7 @@ import java.awt.*;
 import java.sql.SQLException;
 
 public class ExitScreen {
-    public static void createAndShowGUI(String login) throws SQLException {
+    public static void createAndShowGUI(String login, Group group) throws SQLException {
         JFrame frame = new JFrame("Tela de Saida");
         frame.setSize(600, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -19,7 +20,7 @@ public class ExitScreen {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(15, 5, 15, 5);
 
-        Header head = new Header(login);
+        Header head = new Header(login, group);
         gbc.gridy = 0;
         frame.add(head, gbc);
 
@@ -61,7 +62,7 @@ public class ExitScreen {
         backToMenu.addActionListener(e -> {
             try {
                 frame.dispose();
-                MainMenu.createAndShowGUI(login);
+                MainMenu.createAndShowGUI(login, Main.frase_secreta);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -80,8 +81,5 @@ public class ExitScreen {
     }
     private static void close_sys(){
         // TODO
-    }
-    public static void main(String[] args) throws SQLException {
-        MainMenu.createAndShowGUI("fitos");
     }
 }
