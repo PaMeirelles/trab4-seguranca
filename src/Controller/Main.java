@@ -18,9 +18,13 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
+        
+        //TODO: Remover testes de tela de menu e registo
+        //RegistrationManager.register(true, login);
+        //MainMenu.createAndShowGUI(login);
 
         if (isFirstAccess) {
-            while(true){
+            while(isFirstAccess){
                 RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
                     break;
