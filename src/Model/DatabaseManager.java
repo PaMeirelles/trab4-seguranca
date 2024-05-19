@@ -375,7 +375,7 @@ public class DatabaseManager {
         conn.close();
         return null;
     }
-    public static int getUserGroup(String login) throws SQLException {
+    public static Group getUserGroup(String login) throws SQLException {
         Connection conn = getConnection();
         String query = "SELECT group_id FROM usuarios WHERE login = ?";
         PreparedStatement statement = conn.prepareStatement(query);
@@ -384,10 +384,15 @@ public class DatabaseManager {
         if (resultSet.next()) {
             int group = resultSet.getInt("group_id");
             conn.close();
-            return group;
+            if (group == 1){
+                return Group.ADMIN;
+            }
+            else{
+                return Group.USER;
+            }
         }
         conn.close();
-        return 0;
+        return null;
     }
 
     public static void main(String[] args) throws Exception{
