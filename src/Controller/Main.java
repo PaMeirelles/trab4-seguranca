@@ -103,7 +103,7 @@ public class Main {
                         log("3007", login);
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
                         // TODO: Redirecionar para a tela de login invés disso
-                        System.exit(0);
+                        endSystem();
                     }
                     else {
                         if(attemptsRemaining == 1){
@@ -143,7 +143,7 @@ public class Main {
                         log("4007", login);
                         JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
                         // TODO: Redirecionar para a tela de login
-                        System.exit(0);
+                        endSystem();
                     } else {
                         if(attemptsRemaining == 1){
                             log("4004", login);
