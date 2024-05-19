@@ -124,6 +124,11 @@ public class DatabaseManager {
         return false; // Return false if no rows were found for the given login
     }
 
+    public static PublicKey retrievePublicKey(String login) throws Exception {
+        X509Certificate cert = retrieveCertificate(login);
+        return cert.getPublicKey();
+    }
+
 
     public static byte[] retrieveprivateKeyBytes(String login) throws SQLException {
         String query = "SELECT private_key FROM KeyByLogin WHERE login = ?";
