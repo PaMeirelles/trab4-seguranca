@@ -104,8 +104,100 @@ public class MainMenu {
         frame.add(menu, gbc);
         frame.setVisible(true);
     }
-    private static void displayConsultarArquivos(String login, String adminSecretPhrase){
-        // TODO
+    private static void displayConsultarArquivos(String login, String adminSecretPhrase) {
+        JFrame frame = new JFrame("File Decoder");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 2));
+
+        JLabel folderPathLabel = new JLabel("Folder Path:");
+        JTextField folderPathField = new JTextField();
+
+        JLabel secretPhraseLabel = new JLabel("Secret Phrase:");
+        JTextField secretPhraseField = new JTextField();
+
+        JButton decodeButton = new JButton("Decode");
+
+        panel.add(folderPathLabel);
+        panel.add(folderPathField);
+        panel.add(secretPhraseLabel);
+        panel.add(secretPhraseField);
+        panel.add(decodeButton);
+
+        frame.getContentPane().add(BorderLayout.NORTH, panel);
+
+        JTable table = new JTable();
+        JScrollPane tableScrollPane = new JScrollPane(table);
+        frame.getContentPane().add(BorderLayout.CENTER, tableScrollPane);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
+        frame.getContentPane().add(BorderLayout.EAST, buttonScrollPane);
+
+        decodeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String folderPath = folderPathField.getText();
+                String secretPhrase = secretPhraseField.getText();
+                try {
+                    List<SecretFile> secretFiles = decodeIndex(adminSecretPhrase, folderPath);
+                    PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
+                    PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
+                    getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
+                }
+                catch (InvalidPhraseException ex){
+                    JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
+                }
+                catch(IntegrityCheckFailedException ex){
+                    JOptionPane.showMessageDialog(frame, "Falha no teste de integridade");
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        frame.setVisible(true);
+    }
+
+    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files, JPanel buttonPanel) {
+        String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+
+        buttonPanel.removeAll();  // Clear any existing buttons
+
+        for (SecretFile file : files) {
+            Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString()};
+            model.addRow(rowData);
+
+            JButton button = new JButton("Decrypt " + file.fakeName);
+            buttonPanel.add(button);
+
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
+                    }
+                    catch (InvalidPhraseException ex){
+                        JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
+                    }
+                    catch(IntegrityCheckFailedException ex){
+                        JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
+                    }
+                    catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            });
+        }
+        table.setModel(model);
+        buttonPanel.revalidate();
+        buttonPanel.repaint();
     }
     private static void telaDeSaida(String login, String adminSecretPhrase){
         // TODO
