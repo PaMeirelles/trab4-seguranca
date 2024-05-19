@@ -87,7 +87,6 @@ public class VaultHandler {
                 g = Group.ADMIN;
             }
             else {
-                // TODO: Tratar o caso de nenhum dos dois
                 g = Group.USER;
             }
             secretFile.group = g; // Assuming Group constructor takes the group name
