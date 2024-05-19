@@ -356,6 +356,49 @@ public class DatabaseManager {
         conn.close();
         return 0;
     }
+    public static String getUserName(String login) throws SQLException {
+        Connection conn = getConnection();
+        int midRelevante = getMidFromCode("5001");
+        String query = "SELECT friendly_name FROM usuarios WHERE login = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, login);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            String name = resultSet.getString("friendly_name");
+            conn.close();
+            return name;
+        }
+        conn.close();
+        return null;
+    }
+    public static int getUserGroup(String login) throws SQLException {
+        Connection conn = getConnection();
+        int midRelevante = getMidFromCode("5001");
+        String query = "SELECT group_id FROM usuarios WHERE login = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, login);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            int group = resultSet.getInt("group_id");
+            conn.close();
+            return group;
+        }
+        conn.close();
+        return 0;
+    }
+    public static int getUserCount(String login) throws SQLException {
+        Connection conn = getConnection();
+        int midRelevante = getMidFromCode("5001");
+        String query = "SELECT COUNT(*) AS count FROM usuarios";
+        ResultSet resultSet = conn.prepareStatement(query).executeQuery();
+        if (resultSet.next()) {
+            int count = resultSet.getInt("count");
+            conn.close();
+            return count;
+        }
+        conn.close();
+        return 0;
+    }
 
     public static void main(String[] args) throws Exception{
         /* String login = "admin@inf1416.puc-rio.br";

@@ -10,6 +10,7 @@ public class Constants {
     public static final String DIGEST_ALGO = "SHA-256";
     public static final String CERTIFICATE_TYPE = "X.509";
     public static final String CONNECTION_STRING = "jdbc:sqlite:D:/Segurança/trab4-seguranca/db.db";
+    //public static final String CONNECTION_STRING = "jdbc:sqlite:../db.db";
     public static final String SECURE_RANDOM_ALGO = "SHA1PRNG";
     public static final Integer SALT_LENGTH = 16;
     public static final Integer COST_FACTOR = 12;

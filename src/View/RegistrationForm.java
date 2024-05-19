@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import static Model.CertificateInfo.extractCommonName;
 import static Model.CertificateInfo.extractEmail;
 
-public class RegistrationForm extends JDialog {
+public class RegistrationForm extends JDialog{
     private JTextField textFieldCertPath;
     private JTextField textFieldKeyPath;
     private JTextField textFieldSecretPhrase;
@@ -28,26 +28,56 @@ public class RegistrationForm extends JDialog {
     private boolean goBackPressed;
 
     public RegistrationForm(String login, Frame owner, boolean isFirstAccess, RegistrationCallback callback) throws SQLException {
-        super(owner, "Cadastro de Usuário", true); // true for modal
+        super(owner, "Cadastro de Usuario", true);
         DatabaseManager.log("6001");
+        
+        setSize(600, 600);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setSize(600, 400);
-        setLayout(new GridLayout(8, 2, 10, 10));
+        setLayout(new GridBagLayout());
+        setLocationRelativeTo(null);
 
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(15, 5, 15, 5);
+
+        Header head = new Header(login);
+        gbc.gridy = 0;
+        add(head, gbc);
+
+        gbc.gridy = 1;
+        add(new JSeparator(), gbc);
+
+        int userCount = DatabaseManager.getUserAccessCount(login);
+        JPanel user_count = new JPanel();
+        user_count.setLayout(new GridLayout(1, 1, 10, 10));
+        user_count.add(new JLabel("Total de usuarios do sistema: " + userCount));
+
+        gbc.gridy = 2;
+        add(user_count, gbc);
+
+        gbc.gridy = 3;
+        add(new JSeparator(), gbc);
+
+        gbc.gridy = 4;
+        add(new JLabel("Formulario de Cadastro: "), gbc);
+
+        JPanel form = new JPanel();
+        form.setLayout(new GridLayout(7, 1, 10, 10));
+        
         JLabel labelCertPath = new JLabel("Caminho do arquivo do certificado digital:");
         textFieldCertPath = new JTextField();
-        add(labelCertPath);
-        add(textFieldCertPath);
+        form.add(labelCertPath);
+        form.add(textFieldCertPath);
 
         JLabel labelKeyPath = new JLabel("Caminho do arquivo da chave privada:");
         textFieldKeyPath = new JTextField();
-        add(labelKeyPath);
-        add(textFieldKeyPath);
+        form.add(labelKeyPath);
+        form.add(textFieldKeyPath);
 
         JLabel labelSecretPhrase = new JLabel("Frase secreta:");
         textFieldSecretPhrase = new JTextField();
-        add(labelSecretPhrase);
-        add(textFieldSecretPhrase);
+        form.add(labelSecretPhrase);
+        form.add(textFieldSecretPhrase);
 
         JLabel labelGroup = new JLabel("Grupo:");
         if (isFirstAccess) {
@@ -55,18 +85,18 @@ public class RegistrationForm extends JDialog {
         } else {
             comboBoxGroup = new JComboBox<>(new String[]{"ADMIN", "USER"});
         }
-        add(labelGroup);
-        add(comboBoxGroup);
+        form.add(labelGroup);
+        form.add(comboBoxGroup);
 
         JLabel labelPassword = new JLabel("Senha pessoal:");
         passwordField = new JPasswordField();
-        add(labelPassword);
-        add(passwordField);
+        form.add(labelPassword);
+        form.add(passwordField);
 
         JLabel labelConfirmPassword = new JLabel("Confirmação senha pessoal:");
         confirmPasswordField = new JPasswordField();
-        add(labelConfirmPassword);
-        add(confirmPasswordField);
+        form.add(labelConfirmPassword);
+        form.add(confirmPasswordField);
 
         JButton buttonRegister = new JButton("Submit");
         buttonRegister.addActionListener(new ActionListener() {
@@ -138,7 +168,7 @@ public class RegistrationForm extends JDialog {
                 }
             }
         });
-        add(buttonRegister);
+        form.add(buttonRegister);
 
         JButton buttonGoBack = new JButton("Go Back");
         buttonGoBack.addActionListener(new ActionListener() {
@@ -155,9 +185,15 @@ public class RegistrationForm extends JDialog {
         });
 
         if (!isFirstAccess) {
-            add(buttonGoBack);
+            form.add(buttonGoBack);
         }
 
+        //TODO remover goback
+        form.add(buttonGoBack);
+        //======================
+
+        gbc.gridy = 5;
+        add(form, gbc);
         setVisible(true);
     }
     private void showTotpKeyDialog(String totpKey) {
