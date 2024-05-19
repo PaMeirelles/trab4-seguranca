@@ -19,9 +19,10 @@ public class Main {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
         
-        //TODO: Remover testes de tela de menu e registo
+        //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
         //MainMenu.createAndShowGUI(login);
+        ExitScreen.createAndShowGUI(login);
 
         if (isFirstAccess) {
             while(isFirstAccess){

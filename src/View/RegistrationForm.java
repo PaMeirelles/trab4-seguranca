@@ -181,10 +181,15 @@ public class RegistrationForm extends JDialog{
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
-                dispose(); // Close the dialog
+                try {
+                    dispose();
+                    MainMenu.createAndShowGUI(login);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                } 
             }
         });
-
+    
         if (!isFirstAccess) {
             form.add(buttonGoBack);
         }
