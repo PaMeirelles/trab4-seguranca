@@ -19,24 +19,25 @@ public class Main {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
         
-        //TODO: Remover testes de tela de menu e registo
+        //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
         //MainMenu.createAndShowGUI(login);
+        ExitScreen.createAndShowGUI(login);
 
-        if (isFirstAccess) {
-            while(isFirstAccess){
-                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-                if(r == RegistrationManager.RegistrationResult.SUCCESS){
-                    break;
-                }
-            }
-        }
-        startAuthenticationProcess();
-        startLoginProcess();
-        startPasswordProcess();
-        startTotpProcess();
-        log("1003", login);
-        MainMenu.createAndShowGUI(login);
+        // if (isFirstAccess) {
+        //     while(isFirstAccess){
+        //         RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+        //         if(r == RegistrationManager.RegistrationResult.SUCCESS){
+        //             break;
+        //         }
+        //     }
+        // }
+        // startAuthenticationProcess();
+        // startLoginProcess();
+        // startPasswordProcess();
+        // startTotpProcess();
+        // log("1003", login);
+        // MainMenu.createAndShowGUI(login);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();

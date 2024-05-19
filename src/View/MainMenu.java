@@ -9,8 +9,7 @@ import java.sql.SQLException;
 
 public class MainMenu {
     public static void createAndShowGUI(String login) throws SQLException {
-        JFrame frame = new JFrame("MainMenu");
-        frame.setTitle("Menu Principal");
+        JFrame frame = new JFrame("Menu Principal");
         frame.setSize(400, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new GridBagLayout());
@@ -51,6 +50,7 @@ public class MainMenu {
                 throw new RuntimeException(ex);
             }
             try {
+                frame.dispose();
                 RegistrationManager.register(false, login);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
@@ -72,7 +72,12 @@ public class MainMenu {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            telaDeSaida();
+            try {
+                telaDeSaida(login);
+                frame.dispose();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         menu.add(cadastrarUsuarioButton);
@@ -86,8 +91,8 @@ public class MainMenu {
     private static void displayConsultarArquivos(){
         // TODO
     }
-    private static void telaDeSaida(){
-        // TODO
+    private static void telaDeSaida(String login)throws SQLException{
+        ExitScreen.createAndShowGUI(login);
     }
     public static void main(String[] args) throws SQLException {
         MainMenu.createAndShowGUI("fitos");
