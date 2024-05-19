@@ -16,7 +16,7 @@ import static Model.VaultHandler.decodeIndex;
 
 public class MainMenu {
 
-    public static void createAndShowGUI(String login) throws SQLException {
+    public static void createAndShowGUI(String login, String adminSecretPhrase) throws SQLException {
         DatabaseManager.log("5001", login);
         JFrame frame = new JFrame("Menu Principal");
 
@@ -49,7 +49,7 @@ public class MainMenu {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            displayConsultarArquivos(login);
+            displayConsultarArquivos(login, adminSecretPhrase);
         });
 
         sairButton.addActionListener(e -> {
@@ -72,7 +72,7 @@ public class MainMenu {
         frame.setVisible(true);
     }
 
-    private static void displayConsultarArquivos(String login) {
+    private static void displayConsultarArquivos(String login, String adminSecretPhrase) {
         JFrame frame = new JFrame("File Decoder");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
@@ -111,7 +111,7 @@ public class MainMenu {
                 String folderPath = folderPathField.getText();
                 String secretPhrase = secretPhraseField.getText();
                 try {
-                    List<SecretFile> secretFiles = decodeIndex(secretPhrase, folderPath);
+                    List<SecretFile> secretFiles = decodeIndex(adminSecretPhrase, folderPath);
                     PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                     PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
                     getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
@@ -135,7 +135,7 @@ public class MainMenu {
             Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString()};
             model.addRow(rowData);
 
-            JButton button = new JButton("Decrypt" + file.fakeName);
+            JButton button = new JButton("Decrypt " + file.fakeName);
             buttonPanel.add(button);
 
             button.addActionListener(new ActionListener() {
@@ -159,6 +159,6 @@ public class MainMenu {
     }
 
     public static void main(String[] args) throws SQLException {
-        MainMenu.createAndShowGUI("admin@inf1416.puc-rio.br");
+        MainMenu.createAndShowGUI("user01@inf1416.puc-rio.br", "admin");
     }
 }
