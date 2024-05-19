@@ -52,15 +52,32 @@ public class ExitScreen {
         JButton backToMenu = new JButton("Voltar ao Menu Principal");
         
         endSession.addActionListener(e -> {
+            try {
+                DatabaseManager.log("8002", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            frame.dispose();
             close_session();
         });
 
         endSys.addActionListener(e -> {
+            try {
+                DatabaseManager.log("8003", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             close_sys();
         });
 
         backToMenu.addActionListener(e -> {
-            
+            try {
+                DatabaseManager.log("8004", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            frame.dispose();
+            MainMenu.createAndShowGUI(login, Main.frase_secreta);
         });
 
         exit_pan.add(endSession);
@@ -71,35 +88,10 @@ public class ExitScreen {
         frame.add(exit_pan, gbc);
         frame.setVisible(true);
     }
-    private static void back_to_menu(){
-
-        try {
-            DatabaseManager.log("8004", login);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        frame.dispose();
-        MainMenu.createAndShowGUI(login, Main.frase_secreta);
-    }
     private static void close_session(){
-
-        try {
-            DatabaseManager.log("8002", login);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        frame.dispose();
         // TODO
     }
     private static void close_sys(){
-        try {
-            DatabaseManager.log("8003", login);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        }
-        
         System.exit(0);
     }
 }
