@@ -11,6 +11,7 @@ import java.security.PublicKey;
 import java.util.List;
 import java.sql.SQLException;
 
+import static Model.DatabaseManager.getUserGroup;
 import static Model.VaultHandler.decodeFile;
 import static Model.VaultHandler.decodeIndex;
 
@@ -27,8 +28,8 @@ public class MainMenu {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(15, 5, 15, 5);
-
-        Header head = new Header(login);
+        Group group = getUserGroup(login);
+        Header head = new Header(login, group);
         gbc.gridy = 0;
         frame.add(head, gbc);
 
@@ -82,8 +83,9 @@ public class MainMenu {
             }
             telaDeSaida();
         });
-
-        menu.add(cadastrarUsuarioButton);
+        if(group == Group.ADMIN){
+            menu.add(cadastrarUsuarioButton);
+        }
         menu.add(consultarPastaButton);
         menu.add(sairButton);
         

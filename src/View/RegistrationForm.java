@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 
 import static Model.CertificateInfo.extractCommonName;
 import static Model.CertificateInfo.extractEmail;
+import static Model.DatabaseManager.getUserGroup;
 
 public class RegistrationForm extends JDialog{
     private JTextField textFieldCertPath;
@@ -40,7 +41,7 @@ public class RegistrationForm extends JDialog{
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(15, 5, 15, 5);
 
-        Header head = new Header(login);
+        Header head = new Header(login, getUserGroup(login));
         gbc.gridy = 0;
         add(head, gbc);
 

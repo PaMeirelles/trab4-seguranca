@@ -1,6 +1,8 @@
 package View;
 
 import Model.DatabaseManager;
+import Model.Group;
+
 import javax.swing.*;
 import java.sql.*;
 import java.awt.*;
@@ -8,15 +10,15 @@ import java.awt.*;
 public class Header extends JPanel {
     
 
-    public Header(String login)throws SQLException{
+    public Header(String login, Group group)throws SQLException{
         setLayout(new GridLayout(3, 1, 10, 5));
-        String group;
         String name;
-        if (DatabaseManager.getUserGroup(login) == 0){
-            group = new String ("ADMIN");
+        String groupString;
+        if (group == Group.ADMIN){
+            groupString = new String ("ADMIN");
             }
             else {
-                group = new String ("USER");
+            groupString = new String ("USER");
             }
             name = DatabaseManager.getUserName(login);
         JLabel lb_login = new JLabel("Login: " + login);
