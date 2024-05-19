@@ -135,7 +135,14 @@ public class MainMenu {
                     PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                     PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
                     getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
-                } catch (Exception ex) {
+                }
+                    catch (InvalidPhraseException ex){
+                    JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
+                    }
+                    catch(IntegrityCheckFailedException ex){
+                    JOptionPane.showMessageDialog(frame, "Falha no teste de integridade");
+                }
+                    catch (Exception ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
                 }
@@ -163,7 +170,14 @@ public class MainMenu {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
-                    } catch (Exception ex) {
+                    }
+                    catch (InvalidPhraseException ex){
+                        JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
+                    }
+                    catch(IntegrityCheckFailedException ex){
+                        JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
+                    }
+                    catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
                 }
