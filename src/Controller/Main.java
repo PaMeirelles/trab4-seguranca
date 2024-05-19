@@ -24,7 +24,7 @@ public class Main {
         
         //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
-        //MainMenu.createAndShowGUI(login, frase_secreta);
+        //MainMenu.createAndShowGUI("ca@grad.inf.puc-rio.br", "admin");
         ExitScreen.createAndShowGUI(login, Group.ADMIN);
 
         // if (isFirstAccess) {

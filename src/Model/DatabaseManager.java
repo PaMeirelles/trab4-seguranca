@@ -389,7 +389,7 @@ public class DatabaseManager {
         if (resultSet.next()) {
             int group = resultSet.getInt("group_id");
             conn.close();
-            if (group == 1){
+            if (group == 0){
                 return Group.ADMIN;
             }
             else{

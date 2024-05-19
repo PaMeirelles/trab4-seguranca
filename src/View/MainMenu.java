@@ -59,6 +59,8 @@ public class MainMenu {
         cadastrarUsuarioButton.addActionListener(e -> {
             try {
                 DatabaseManager.log("5002", login);
+                RegistrationManager.register(false, login);
+
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
