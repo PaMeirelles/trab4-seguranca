@@ -7,8 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 
-import static Controller.Main.endSystem;
-
 public class ExitScreen {
     public static void createAndShowGUI(String login, Group group) throws SQLException {
         DatabaseManager.log("8001", login);
@@ -58,7 +56,7 @@ public class ExitScreen {
                 DatabaseManager.log("8002", login);
                 frame.dispose();
                 close_session();
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -92,7 +90,7 @@ public class ExitScreen {
         frame.add(exit_pan, gbc);
         frame.setVisible(true);
     }
-    private static void close_session() throws SQLException {
+    private static void close_session() throws Exception {
         Main.resetAndRestart();
     }
 
