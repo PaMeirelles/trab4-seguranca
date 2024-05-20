@@ -39,8 +39,7 @@ public class FileExplorer {
         gbc.gridy = 1;
         frame.add(new JSeparator(), gbc);
 
-        //TODO: user count -> query count
-        int aCount = DatabaseManager.getUserAccessCount(login);
+        int aCount = DatabaseManager.getUserQueryCount(login);
         JPanel access_count = new JPanel();
         access_count.setLayout(new GridLayout(1, 1, 10, 10));
         access_count.add(new JLabel("Total de acessos do usuario: " + aCount));
