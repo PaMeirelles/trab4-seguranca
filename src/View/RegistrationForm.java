@@ -5,6 +5,9 @@ import Model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -133,10 +136,6 @@ public class RegistrationForm extends JDialog{
             goBackPressed = true;
             try {
                 DatabaseManager.log("6010", login);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            try {
                 dispose();
                 MainMenu.createAndShowGUI(login, Main.frase_secreta);
             } catch (SQLException ex) {
@@ -168,6 +167,10 @@ public class RegistrationForm extends JDialog{
                     dispose();
                     showTotpKeyDialog(totpKey);
                 }
+
+                dispose();
+                DatabaseManager.log("6001", login);
+                RegistrationManager.register(false, login);
 
             } catch (PasswordMismatchException ex) {
                 try {
@@ -215,6 +218,7 @@ public class RegistrationForm extends JDialog{
                 throw new RuntimeException(ex);
             }
         });
+        
         return buttonRegister;
     }
 
