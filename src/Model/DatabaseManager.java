@@ -162,7 +162,7 @@ public class DatabaseManager {
 
     private static String prepareTotpKey(String password, String totpKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Key chave = Register.genKey(password);
-        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);;
+        Cipher cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, chave);
         byte[] encryptedBytes = cipher.doFinal(totpKey.getBytes());
         Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
@@ -242,7 +242,6 @@ public class DatabaseManager {
         Base32 base32Decoder = new Base32(Base32.Alphabet.BASE32, true, false);
         return new String(cipher.doFinal(base32Decoder.fromString(code)));
     }
-
     private static void fillMsgTable() throws SQLException {
         Connection conn = getConnection();
         String[] mensagens = {
