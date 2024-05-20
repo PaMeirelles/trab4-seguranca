@@ -92,7 +92,7 @@ public class Login extends JFrame {
             try {
                 dialog.dispose();
                 Main.resetAndRestart();
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });

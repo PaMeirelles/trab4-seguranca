@@ -57,7 +57,7 @@ public class ExitScreen {
                 frame.dispose();
                 Main.resetAndRestart();
                 
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
