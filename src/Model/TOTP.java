@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 public class TOTP {
-    private byte [] key = null;
-    private long timeStepInSeconds = 30;
+    private final byte [] key;
+    private final long timeStepInSeconds;
 
     // Construtor da classe. Recebe a chave secreta em BASE32 e o intervalo
     // de tempo a ser adotado (default = 30 segundos). Deve decodificar a

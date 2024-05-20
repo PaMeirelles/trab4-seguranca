@@ -1,13 +1,9 @@
 package Model;
 
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 
 import static Model.Constants.INTERVAL_IN_MILISSECONDS;
 
