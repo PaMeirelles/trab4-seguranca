@@ -59,8 +59,6 @@ public class ExitScreen {
                 
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
             }
         });
 
