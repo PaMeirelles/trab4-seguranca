@@ -83,7 +83,7 @@ public class Register {
         return factory.generatePrivate(new PKCS8EncodedKeySpec(chavePrivadaBytes));
     }
 
-    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, InvalidPrivateKeyException {
+    private void fillPrivateKey(byte [] bytes, boolean fromFile) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, InvalidKeySpecException, InvalidPrivateKeyException {
         try {
             privateKey = genPrivateKey(bytes, fromFile, secretPhrase);
         }
@@ -161,13 +161,13 @@ public class Register {
         this.confirmPassword = "06052024";
     }
 
-    private String generateTotpKey() throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException {
+    private String generateTotpKey() {
         byte[] randomBytes = genRandomBytes(Constants.TOTP_SIZE);
         Base32 base32Encoder = new Base32(Base32.Alphabet.BASE32, true, false);
         return base32Encoder.toString(randomBytes);
     }
 
-    public String registerUser() throws InvalidPrivateKeyException, PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, InvalidPasswordFormatException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, LoginNotUniqueException, IOException, InvalidKeySpecException, CertificateException {
+    public String registerUser() throws InvalidPrivateKeyException, PasswordMismatchException, SQLException, NoSuchPaddingException, IllegalBlockSizeException, InvalidPasswordFormatException, RepeatingCharactersException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, LoginNotUniqueException, InvalidKeySpecException, CertificateException {
         this.fillCertificate();
         this.certificateInfo = new CertificateInfo(this.certificate);
         this.totpKey = generateTotpKey();

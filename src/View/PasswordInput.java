@@ -1,6 +1,5 @@
 package View;
 
-import Controller.Main;
 
 import javax.swing.*;
 import java.sql.SQLException;
@@ -8,18 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.function.Consumer;
 
 
 public class PasswordInput{
     
     
 
-    public static List<String> createAndShowGUI() throws SQLException {
+    public static List<String> createAndShowGUI() {
         JDialog frame = new JDialog((Frame) null, true);
         frame.setTitle("Teclado Virtual");
         frame.setSize(400, 400);
@@ -37,8 +31,6 @@ public class PasswordInput{
     
         JTextField passwordField = new JTextField(20);
         passwordField.setEditable(false);
-        
-        Font f = new Font("Arial", Font.PLAIN, 15);
 
         JPanel keyboardPanel = new JPanel(new GridLayout(2, 5, 5, 5));
 
@@ -141,9 +133,7 @@ public class PasswordInput{
         });
 
         JButton enter = new JButton("Enter");
-        enter.addActionListener(e -> {
-            frame.dispose();
-        });
+        enter.addActionListener(e -> frame.dispose());
 
         numPad_1.setText(buttonLabels[0].get(0));
         numPad_2.setText(buttonLabels[0].get(1));

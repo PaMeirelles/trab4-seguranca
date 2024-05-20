@@ -4,16 +4,12 @@ import Model.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
 import java.sql.SQLException;
-import Controller.*;
 
 
-import static Model.DatabaseManager.getUserGroup;
 import static Model.VaultHandler.decodeFile;
 import static Model.VaultHandler.decodeIndex;
 
@@ -94,41 +90,37 @@ public class FileExplorer {
         gbc.weighty = 0;
         frame.add(backToMenu, gbc);
 
-        showList.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    DatabaseManager.log("7003", login);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                String folderPath = folderPathField.getText();
-                String secretPhrase = secretPhraseField.getText();
-                try {
-                    List<SecretFile> secretFiles = decodeIndex(secretPhrase, folderPath);
-                    PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
-                    PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
-                    getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
+        showList.addActionListener(e -> {
+            try {
+                DatabaseManager.log("7003", login);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            String folderPath = folderPathField.getText();
+            String secretPhrase1 = secretPhraseField.getText();
+            try {
+                List<SecretFile> secretFiles = decodeIndex(secretPhrase1, folderPath);
+                PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
+                PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase1);
+                getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
 
+            }
+            catch (InvalidPhraseException ex){
+                JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
+            }
+            catch(FilePathNotFoundException ex){
+                try {
+                    DatabaseManager.log("7004", login);
+                } catch (SQLException exc) {
+                    throw new RuntimeException(exc);
                 }
-                catch (InvalidPhraseException ex){
-                    JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
-                }
-                catch(FilePathNotFoundException ex){
-                    try {
-                        DatabaseManager.log("7004", login);
-                    } catch (SQLException exc) {
-                        throw new RuntimeException(exc);
-                    }
-                    JOptionPane.showMessageDialog(frame, "Caminho da pasta incorreto");
-                }
-                catch(IntegrityCheckFailedException ex){
-                    JOptionPane.showMessageDialog(frame, "Falha no teste de integridade");
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
-                }
+                JOptionPane.showMessageDialog(frame, "Caminho da pasta incorreto");
+            }
+            catch(IntegrityCheckFailedException ex){
+                JOptionPane.showMessageDialog(frame, "Falha no teste de integridade");
+            }
+            catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
             }
         });
 
@@ -157,21 +149,18 @@ public class FileExplorer {
             JButton button = new JButton("Decrypt " + file.fakeName);
             buttonPanel.add(button);
 
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
-                    }
-                    catch (InvalidPhraseException ex){
-                        JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
-                    }
-                    catch(IntegrityCheckFailedException ex){
-                        JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
-                    }
-                    catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
+            button.addActionListener(e -> {
+                try {
+                    decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
+                }
+                catch (InvalidPhraseException ex){
+                    JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
+                }
+                catch(IntegrityCheckFailedException ex){
+                    JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
+                }
+                catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
             });
         }
