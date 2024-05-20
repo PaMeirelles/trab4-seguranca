@@ -101,34 +101,29 @@ public class VaultHandler {
         return secretFiles;
     }
 
-    public static List<SecretFile> decodeIndex(String secretPhrase, String folderPath, String login) throws Exception {
+    public static List<SecretFile> decodeIndex(String secretPhrase, String folderPath) throws Exception {
         Register r = new Register();
         boolean phraseValid = r.validateAdmin(secretPhrase);
-        if (!phraseValid) {
+        if (!phraseValid){
             throw new InvalidPhraseException();
         }
         byte[] indexInfo = decryptFile(folderPath, r.privateKey, "index");
-        DatabaseManager.log("7005", login);
         boolean integrity = checkIntegrity(folderPath, "index.asd", r.certificateInfo.publicKey, indexInfo);
-        if (!integrity) {
+        if (!integrity){
             throw new IntegrityCheckFailedException();
         }
         return parseSecretFiles(new String(indexInfo));
     }
 
-
-    public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey privateKey, PublicKey publicKey) throws PermissionDeniedException, DecryptionErrorException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException, IntegrityCheckFailedException, SQLException {
+    public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey privateKey, PublicKey publicKey) throws Exception {
         if(!Objects.equals(loggedUser, sf.owner)){
             throw new PermissionDeniedException();
         }
-        DatabaseManager.log("7011", loggedUser);
         byte[] content = decryptFile(pathFolder, privateKey, sf.fakeName);
-        DatabaseManager.log("7013", loggedUser);
         boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", publicKey, content);
         if(!integrity){
             throw new IntegrityCheckFailedException();
         }
-        DatabaseManager.log("7014", loggedUser);
         writeToFile(content, pathFolder, sf.trueName);
     }
 
@@ -136,7 +131,7 @@ public class VaultHandler {
         Register r = new Register();
         //r.fillInfo("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-x509.crt", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-pkcs8-aes.pem", "user01", "USER", "13052024", "13052024");
         r.validateSecretPhrase("admin@inf1416.puc-rio.br", "admin");
-        List<SecretFile> files = decodeIndex( "admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br");
+        List<SecretFile> files = decodeIndex( "admin", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files");
         decodeFile("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Files", "admin@inf1416.puc-rio.br", files.get(0), r.privateKey, r.certificateInfo.publicKey);
     }
 }

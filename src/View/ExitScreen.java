@@ -2,7 +2,6 @@ package View;
 
 import Model.*;
 import Controller.*;
-import org.bouncycastle.util.test.FixedSecureRandom;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,12 +54,20 @@ public class ExitScreen {
         JButton backToMenu = new JButton("Voltar ao Menu Principal");
         
         endSession.addActionListener(e -> {
-            close_session();
+            try {
+                DatabaseManager.log("8002", login);
+                frame.dispose();
+                close_session();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         endSys.addActionListener(e -> {
             try {
-                close_sys();
+                DatabaseManager.log("8003", login);
+                Main.endSystem();
+
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -68,11 +75,13 @@ public class ExitScreen {
 
         backToMenu.addActionListener(e -> {
             try {
+                DatabaseManager.log("8004", login);
                 frame.dispose();
                 MainMenu.createAndShowGUI(login, Main.frase_secreta);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
+            
         });
 
         exit_pan.add(endSession);
@@ -83,10 +92,8 @@ public class ExitScreen {
         frame.add(exit_pan, gbc);
         frame.setVisible(true);
     }
-    private static void close_session(){
-        // TODO
+    private static void close_session() throws SQLException {
+        Main.resetAndRestart();
     }
-    private static void close_sys() throws SQLException {
-        endSystem();
-    }
+
 }

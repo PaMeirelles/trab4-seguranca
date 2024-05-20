@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 public class Login extends JFrame {
     public static String login() throws SQLException {
         JDialog dialog = new JDialog((Frame) null, "Login", true);
+        
         JTextField textField = new JTextField(20);
         JButton okButton = new JButton("OK");
         JButton cancelButton = new JButton("Cancelar");
@@ -57,93 +58,9 @@ public class Login extends JFrame {
             Main.endSystem();
             return null;
         }
+
     }
-    private static List<String> generateLabels(){
-        String chars = "0123456789";
 
-        List<Character> charList = new ArrayList<>();
-        for (char c : chars.toCharArray()) {
-            charList.add(c);
-        }
-
-        Collections.shuffle(charList);
-
-        List<String> labels = new ArrayList<>();
-        for (int i = 0; i < charList.size(); i += 2) {
-            labels.add(String.valueOf(charList.get(i)) + '-' + charList.get(i + 1));
-        }
-        labels.add("Clear");
-        labels.add("Enter");
-        return labels;
-    }
-    public static List<String> collectPassword() {
-        final List<String>[] possiblePasswords = new List[]{new ArrayList<>()}; // Initialize an empty ArrayList
-        possiblePasswords[0].add("");
-
-        List<String> buffer = new ArrayList<>(); // Initialize an empty ArrayList
-
-        JFrame frame = new JFrame("Virtual Keyboard");
-
-        JTextField passwordField = new JTextField(20);
-        passwordField.setEditable(false);
-
-        Font f = new Font("Arial", Font.PLAIN, 15);
-
-        JPanel keyboardPanel = new JPanel(new GridLayout(2, 5, 5, 5));
-        final List<String>[] buttonLabels = new List[]{generateLabels()};
-
-        for (String label : buttonLabels[0]) {
-            JButton button = new JButton(label);
-            button.setFont(f);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String command = e.getActionCommand();
-                    if (command.equals("Clear")) {
-                        possiblePasswords[0].clear();
-                        passwordField.setText("");
-                    } else if (command.equals("Enter")) {
-                        frame.dispose(); // Close the window when Enter is pressed
-                    } else {
-                        passwordField.setText(passwordField.getText() + '*');
-                        buffer.clear();
-                        for(String password : possiblePasswords[0]){
-                            buffer.add(password + command.charAt(0));
-                            buffer.add(password + command.charAt(2));
-                        }
-                        possiblePasswords[0].clear();
-                        possiblePasswords[0].addAll(buffer);
-                    }
-                    buttonLabels[0] = generateLabels();
-                    int index = 0;
-                    for (Component component : keyboardPanel.getComponents()) {
-                        if (component instanceof JButton) {
-                            JButton button = (JButton) component;
-                            button.setText(buttonLabels[0].get(index++));
-                        }
-                    }
-                }
-            });
-            keyboardPanel.add(button);
-        }
-
-        frame.getContentPane().add(passwordField, BorderLayout.NORTH);
-        frame.getContentPane().add(keyboardPanel, BorderLayout.CENTER);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
-        // Wait until the frame is closed
-        while (frame.isVisible()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return possiblePasswords[0];
-    }
     public static String collectTOTPCode() {
         JDialog dialog = new JDialog((Frame) null, "TOTP Code", true);
         JTextField textField = new JTextField(6);
