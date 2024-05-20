@@ -132,7 +132,6 @@ public class FileExplorer {
 
         frame.setVisible(true);
     }
-    public static void main (String[] args) throws SQLException {createAndShowGUI("admin@inf1416.puc-rio.br", "admin");}
     private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files) {
         String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo", "Ação"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
@@ -141,6 +140,7 @@ public class FileExplorer {
                 return column == 4; // Only the "Action" column is editable
             }
         };
+        
 
         for (SecretFile file : files) {
             Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString(), "Decrypt"};
@@ -156,6 +156,7 @@ public class FileExplorer {
 
         table.revalidate();
         table.repaint();
+        DatabaseManager.log("7009", loggedUser);
     }
 }
 

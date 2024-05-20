@@ -118,11 +118,14 @@ public class VaultHandler {
         if(!Objects.equals(loggedUser, sf.owner)){
             throw new PermissionDeniedException();
         }
+        DatabaseManager.log("7011", loggedUser);
         byte[] content = decryptFile(pathFolder, privateKey, sf.fakeName);
+        DatabaseManager.log("7013", loggedUser);
         boolean integrity = checkIntegrity(pathFolder, sf.fakeName + ".asd", publicKey, content);
         if(!integrity){
             throw new IntegrityCheckFailedException();
         }
+        DatabaseManager.log("7014", loggedUser);
         writeToFile(content, pathFolder, sf.trueName);
     }
 
