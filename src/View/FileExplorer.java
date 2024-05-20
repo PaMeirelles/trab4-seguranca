@@ -3,14 +3,14 @@ package View;
 import Model.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
 import java.sql.SQLException;
 
-
-import static Model.VaultHandler.decodeFile;
 import static Model.VaultHandler.decodeIndex;
 
 public class FileExplorer {
@@ -79,10 +79,6 @@ public class FileExplorer {
 
         JButton backToMenu = new JButton("Voltar ao Menu Principal");
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
-        frame.add(buttonScrollPane);
         gbc.gridy = 5;
         gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -102,7 +98,7 @@ public class FileExplorer {
                 List<SecretFile> secretFiles = decodeIndex(secretPhrase1, folderPath);
                 PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                 PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase1);
-                getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
+                getTable(publicKey, privateKey, login, folderPath, table, secretFiles);
 
             }
             catch (InvalidPhraseException ex){
@@ -136,36 +132,42 @@ public class FileExplorer {
 
         frame.setVisible(true);
     }
-    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files, JPanel buttonPanel) {
-        String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-
-        buttonPanel.removeAll();  // Clear any existing buttons
+    public static void main (String[] args) throws SQLException {createAndShowGUI("admin@inf1416.puc-rio.br", "admin");}
+    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files) {
+        String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo", "Ação"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 4; // Only the "Action" column is editable
+            }
+        };
 
         for (SecretFile file : files) {
-            Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString()};
+            Object[] rowData = {file.fakeName, file.trueName, file.owner, file.group.toString(), "Decrypt"};
             model.addRow(rowData);
-
-            JButton button = new JButton("Decrypt " + file.fakeName);
-            buttonPanel.add(button);
-
-            button.addActionListener(e -> {
-                try {
-                    decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
-                }
-                catch (InvalidPhraseException ex){
-                    JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
-                }
-                catch(IntegrityCheckFailedException ex){
-                    JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
-                }
-                catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
         }
+
         table.setModel(model);
-        buttonPanel.revalidate();
-        buttonPanel.repaint();
+
+        // Add button renderer and editor
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(4).setCellRenderer(new ButtonRenderer());
+        columnModel.getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox(), publicKey, privateKey, loggedUser, pathFolder, files));
+
+        table.revalidate();
+        table.repaint();
+    }
+}
+
+// Renderer for the button in the table
+class ButtonRenderer extends JButton implements TableCellRenderer {
+    public ButtonRenderer() {
+        setOpaque(true);
+    }
+
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+        setText((value == null) ? "Decrypt" : value.toString());
+        return this;
     }
 }

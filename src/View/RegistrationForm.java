@@ -106,21 +106,8 @@ public class RegistrationForm extends JDialog{
         JButton buttonRegister = getjButton(login, callback);
         form.add(buttonRegister);
 
-        JButton buttonGoBack = new JButton("Go Back");
-        buttonGoBack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                goBackPressed = true;
-                try {
-                    DatabaseManager.log("6010", login);
-                    dispose();
-                    MainMenu.createAndShowGUI(login, Main.frase_secreta);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-    
+        JButton buttonGoBack = getjButton(login);
+
         if (!isFirstAccess) {
             form.add(buttonGoBack);
         }
