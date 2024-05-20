@@ -128,7 +128,7 @@ public class PasswordInput{
 
         JButton clear = new JButton("Clear");
         clear.addActionListener(e -> {
-            possiblePasswords[0].clear();
+            possiblePasswords[0].clear();possiblePasswords[0].add("");
             passwordField.setText("");
         });
 

@@ -5,8 +5,6 @@ import Model.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -105,21 +103,8 @@ public class RegistrationForm extends JDialog{
         JButton buttonRegister = getjButton(login, callback);
         form.add(buttonRegister);
 
-        JButton buttonGoBack = new JButton("Go Back");
-        buttonGoBack.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                goBackPressed = true;
-                try {
-                    DatabaseManager.log("6010", login);
-                    dispose();
-                    MainMenu.createAndShowGUI(login, Main.frase_secreta);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-    
+        JButton buttonGoBack = getjButton(login);
+
         if (!isFirstAccess) {
             form.add(buttonGoBack);
         }
@@ -135,10 +120,6 @@ public class RegistrationForm extends JDialog{
             goBackPressed = true;
             try {
                 DatabaseManager.log("6010", login);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            try {
                 dispose();
                 MainMenu.createAndShowGUI(login, Main.frase_secreta);
             } catch (SQLException ex) {
