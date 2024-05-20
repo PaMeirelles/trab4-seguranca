@@ -12,6 +12,7 @@ import static Controller.Main.endSystem;
 
 public class ExitScreen {
     public static void createAndShowGUI(String login, Group group) throws SQLException {
+        DatabaseManager.log("8001", login);
         JFrame frame = new JFrame("Tela de Saida");
         frame.setSize(600, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

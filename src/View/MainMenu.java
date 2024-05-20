@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.AccessControlException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
@@ -143,15 +144,29 @@ public class MainMenu {
                 String folderPath = folderPathField.getText();
                 String secretPhrase = secretPhraseField.getText();
                 try {
-                    List<SecretFile> secretFiles = decodeIndex(adminSecretPhrase, folderPath);
+                    List<SecretFile> secretFiles = decodeIndex(adminSecretPhrase, folderPath, login);
+                    DatabaseManager.log("7006", login);
                     PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                     PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
                     getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
+                }
+                catch (DecryptionErrorException ex){
+                    JOptionPane.showMessageDialog(frame, "Erro de decriptação");
+                    try {
+                        DatabaseManager.log("7007", login);
+                    } catch (SQLException exc) {
+                        throw new RuntimeException(exc);
+                    }
                 }
                 catch (InvalidPhraseException ex){
                     JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
                 }
                 catch(IntegrityCheckFailedException ex){
+                    try {
+                        DatabaseManager.log("7008", login);
+                    } catch (SQLException exc) {
+                        throw new RuntimeException(exc);
+                    }
                     JOptionPane.showMessageDialog(frame, "Falha no teste de integridade");
                 }
                 catch (Exception ex) {
@@ -164,7 +179,7 @@ public class MainMenu {
         frame.setVisible(true);
     }
 
-    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files, JPanel buttonPanel) {
+    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files, JPanel buttonPanel) throws SQLException {
         String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
@@ -181,13 +196,32 @@ public class MainMenu {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
+                        DatabaseManager.log("7010", loggedUser);
                         decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
                     }
-                    catch (InvalidPhraseException ex){
-                        JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
+                    catch (AccessControlException ex){
+                        JOptionPane.showMessageDialog(null, "Acesso ao arquivo negado");
+                        try {
+                            DatabaseManager.log("7012", loggedUser);
+                        } catch (SQLException exc) {
+                            throw new RuntimeException(exc);
+                        }
+                    }
+                    catch (DecryptionErrorException ex){
+                        JOptionPane.showMessageDialog(null, "Falha na decriptação");
+                        try {
+                            DatabaseManager.log("7015", loggedUser);
+                        } catch (SQLException exc) {
+                            throw new RuntimeException(exc);
+                        }
                     }
                     catch(IntegrityCheckFailedException ex){
                         JOptionPane.showMessageDialog(null, "Falha no teste de integridade");
+                        try {
+                            DatabaseManager.log("7016", loggedUser);
+                        } catch (SQLException exc) {
+                            throw new RuntimeException(exc);
+                        }
                     }
                     catch (Exception ex) {
                         throw new RuntimeException(ex);
@@ -198,6 +232,7 @@ public class MainMenu {
         table.setModel(model);
         buttonPanel.revalidate();
         buttonPanel.repaint();
+        DatabaseManager.log("7009", loggedUser);
     }
 
     public static void main(String[] args) throws SQLException {
