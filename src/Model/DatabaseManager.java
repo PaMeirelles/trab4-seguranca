@@ -356,7 +356,7 @@ public class DatabaseManager {
 
     public static int getUserAccessCount(String login) throws SQLException{
         Connection conn = getConnection();
-        int midRelevante = getMidFromCode("4003");
+        int midRelevante = getMidFromCode("1003");
         String query = "SELECT COUNT(*) AS count FROM registro WHERE MID = ? AND \"campo 1\" = ?";
         PreparedStatement statement = conn.prepareStatement(query);
         statement.setInt(1, midRelevante);

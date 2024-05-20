@@ -6,6 +6,7 @@ import Model.Register;
 import View.*;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -13,48 +14,51 @@ import java.util.List;
 import static Model.DatabaseManager.log;
 import Model.Group;
 
-
-
 public class Main {
     public static String frase_secreta = null;
     public static String login = null;
     public static String password = null;
+
     public static void main(String[] args) throws SQLException {
+        preRun();
+        run();
+    }
+
+    public static void preRun() throws SQLException {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
-        
-        //TODO: Remover testes das telas
-        //RegistrationManager.register(true, login);
-        //MainMenu.createAndShowGUI(login, frase_secreta);
-        //ExitScreen.createAndShowGUI(login, Group.ADMIN);
-        //MainMenu.createAndShowGUI("ca@grad.inf.puc-rio.br", "admin");
-         if (isFirstAccess) {
-             while(isFirstAccess){
-                 RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
-                     break;
+
+        if (isFirstAccess) {
+            while (isFirstAccess) {
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+                if (r == RegistrationManager.RegistrationResult.SUCCESS) {
+                    break;
                 }
             }
-         }
-         startAuthenticationProcess();
-         startLoginProcess();
-         startPasswordProcess();
-         startTotpProcess();
-         log("1003", login);
-         MainMenu.createAndShowGUI(login, frase_secreta);
+        }
+        startAuthenticationProcess();
     }
+
+    public static void run() throws SQLException {
+        startLoginProcess();
+        startPasswordProcess();
+        startTotpProcess();
+        log("1003", login);
+        MainMenu.createAndShowGUI(login, frase_secreta);
+    }
+
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();
 
         Register r = new Register();
         try {
-            if (!r.validateAdmin(frase_secreta)){
+            if (!r.validateAdmin(frase_secreta)) {
                 JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
-                Main.endSystem();
+                endSystem();
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Frase incorreta. Encerrando o sistema");
-            Main.endSystem();
+            endSystem();
         }
     }
 
@@ -65,11 +69,10 @@ public class Main {
                 Main.login = Login.login();
                 boolean loginExists = LoginModel.loginStep1(Main.login);
                 if (loginExists) {
-                    if(DatabaseManager.userIsBlocked(login)){
+                    if (DatabaseManager.userIsBlocked(login)) {
                         log("2004", login);
                         JOptionPane.showMessageDialog(null, "Seu acesso está bloqueado.");
-                    }
-                    else {
+                    } else {
                         log("2003", login);
                         break;
                     }
@@ -83,6 +86,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
     private static void startPasswordProcess() {
         try {
             log("3001", login);
@@ -97,19 +101,18 @@ public class Main {
                     break;
                 } else {
                     attemptsRemaining -= 1;
-                    if (attemptsRemaining == 0){
+                    if (attemptsRemaining == 0) {
                         log("3006", login);
                         DatabaseManager.blockUser(login);
                         log("3007", login);
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
-                        // TODO: Redirecionar para a tela de login invés disso
-                        endSystem();
-                    }
-                    else {
-                        if(attemptsRemaining == 1){
+                        // Reset and redirect to login screen
+                        resetAndRestart();
+                        return;
+                    } else {
+                        if (attemptsRemaining == 1) {
                             log("3004", login);
-                        }
-                        else{
+                        } else {
                             log("3005", login);
                         }
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Tentativas restantes: " + attemptsRemaining);
@@ -130,25 +133,24 @@ public class Main {
             while (attemptsRemaining > 0) {
                 totpCode = Login.collectTOTPCode();
                 boolean codeCorrect = LoginModel.loginStep3(DatabaseManager.getUserTotpKey(Main.login, password), totpCode);
-                if(codeCorrect){
+                if (codeCorrect) {
                     log("4003", login);
                     password = null;
                     break;
-                }
-                else {
+                } else {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0) {
                         log("4006", login);
                         DatabaseManager.blockUser(login);
                         log("4007", login);
                         JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
-                        // TODO: Redirecionar para a tela de login
-                        endSystem();
+                        // Reset and redirect to login screen
+                        resetAndRestart();
+                        return;
                     } else {
-                        if(attemptsRemaining == 1){
+                        if (attemptsRemaining == 1) {
                             log("4004", login);
-                        }
-                        else{
+                        } else {
                             log("4005", login);
                         }
                         JOptionPane.showMessageDialog(null, "Código incorreto. Tentativas restantes: " + attemptsRemaining);
@@ -160,6 +162,27 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    public static void resetAndRestart() throws SQLException {
+        // Dispose of all open windows
+        for (Window window : Window.getWindows()) {
+            window.dispose();
+        }
+
+        // Reset state variables
+        login = null;
+        password = null;
+
+        // Restart the main logic on the Event Dispatch Thread
+        SwingUtilities.invokeLater(() -> {
+            try {
+                run();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     public static void endSystem() throws SQLException {
         log("1002");
         System.exit(0);
