@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.AccessControlException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
@@ -20,7 +21,7 @@ import static Model.VaultHandler.decodeIndex;
 public class MainMenu {
     public static void createAndShowGUI(String login, String adminSecretPhrase) throws SQLException {
         DatabaseManager.log("5001", login);
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame("MainMenu");
         frame.setTitle("Menu Principal");
         frame.setSize(400, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,12 +54,18 @@ public class MainMenu {
         JPanel menu = new JPanel();
         menu.setLayout(new GridLayout(3, 1, 10, 10));
         JButton cadastrarUsuarioButton = new JButton("1 - Cadastrar um novo usuario");
-        JButton consultarPastaButton = new JButton("2 - Consultar pasta de arquivos secretos do usuario");
+        JButton consultarPastaButton = new JButton("2 - Consultar pasta de arquivos secretos do usuário");
         JButton sairButton = new JButton("3 - Sair do Sistema");
         
         cadastrarUsuarioButton.addActionListener(e -> {
             try {
                 DatabaseManager.log("5002", login);
+                RegistrationManager.register(false, login);
+
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            try {
                 frame.dispose();
                 RegistrationManager.register(false, login);
             } catch (SQLException ex) {

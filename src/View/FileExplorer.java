@@ -98,7 +98,11 @@ public class FileExplorer {
         showList.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DatabaseManager.log("7003", login);
+                try {
+                    DatabaseManager.log("7003", login);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
                 String folderPath = folderPathField.getText();
                 String secretPhrase = secretPhraseField.getText();
                 try {
@@ -112,7 +116,11 @@ public class FileExplorer {
                     JOptionPane.showMessageDialog(frame, "Frase secreta incorreta");
                 }
                 catch(FilePathNotFoundException ex){
-                    DatabaseManager.log("7004", login);
+                    try {
+                        DatabaseManager.log("7004", login);
+                    } catch (SQLException exc) {
+                        throw new RuntimeException(exc);
+                    }
                     JOptionPane.showMessageDialog(frame, "Caminho da pasta incorreto");
                 }
                 catch(IntegrityCheckFailedException ex){

@@ -7,8 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 
-import static Controller.Main.endSystem;
-
 public class ExitScreen {
     public static void createAndShowGUI(String login, Group group) throws SQLException {
         DatabaseManager.log("8001", login);

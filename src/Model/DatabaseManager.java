@@ -363,6 +363,22 @@ public class DatabaseManager {
     public static void log(String code) throws SQLException {
         log(code, null);
     }
+    public static int getUserQueryCount(String login) throws SQLException{
+        Connection conn = getConnection();
+        int midRelevante = getMidFromCode("7009");
+        String query = "SELECT COUNT(*) AS count FROM registro WHERE MID = ? AND \"campo 1\" = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setInt(1, midRelevante);
+        statement.setString(2, login);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            int count = resultSet.getInt("count");
+            conn.close();
+            return count;
+        }
+        conn.close();
+        return 0;
+    }
 
     public static int getUserAccessCount(String login) throws SQLException{
         Connection conn = getConnection();
@@ -380,6 +396,8 @@ public class DatabaseManager {
         conn.close();
         return 0;
     }
+
+
     public static String getUserName(String login) throws SQLException {
         Connection conn = getConnection();
         String query = "SELECT friendly_name FROM usuarios WHERE login = ?";
