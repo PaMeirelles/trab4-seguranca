@@ -2,11 +2,12 @@ package View;
 
 import Model.*;
 import Controller.*;
-import org.bouncycastle.util.test.FixedSecureRandom;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
+
+import static Controller.Main.endSystem;
 
 public class ExitScreen {
     public static void createAndShowGUI(String login, Group group) throws SQLException {
@@ -59,7 +60,6 @@ public class ExitScreen {
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            
         });
 
         endSys.addActionListener(e -> {
@@ -91,7 +91,8 @@ public class ExitScreen {
         frame.add(exit_pan, gbc);
         frame.setVisible(true);
     }
-    private static void close_session(){
-        // TODO
+    private static void close_session() throws SQLException {
+        Main.resetAndRestart();
     }
+
 }
