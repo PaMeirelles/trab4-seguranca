@@ -132,7 +132,7 @@ public class FileExplorer {
 
         frame.setVisible(true);
     }
-    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files) {
+    private static void getTable(PublicKey publicKey, PrivateKey privateKey, String loggedUser, String pathFolder, JTable table, List<SecretFile> files) throws SQLException {
         String[] columnNames = {"Nome código", "Nome real", "Dono", "Grupo", "Ação"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
             @Override
