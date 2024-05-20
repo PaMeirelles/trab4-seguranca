@@ -36,8 +36,8 @@ public class VaultHandler {
 
         cipher = Cipher.getInstance(Constants.AES_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, chave);
+        
         return decodeAndRead(cipher, chave, pathFolder, fileName + ".enc");
-
     }
 
     public static void writeToFile(byte[] content, String pathFolder, String fileName) throws IOException {
@@ -112,6 +112,7 @@ public class VaultHandler {
 
     public static void decodeFile(String pathFolder, String loggedUser, SecretFile sf, PrivateKey privateKey, PublicKey publicKey) throws Exception {
         if(!Objects.equals(loggedUser, sf.owner)){
+            
             throw new PermissionDeniedException();
         }
         byte[] content = decryptFile(pathFolder, privateKey, sf.fakeName);
@@ -122,6 +123,7 @@ public class VaultHandler {
         writeToFile(content, pathFolder, sf.trueName);
     }
 
+    //TODO: remover
     public static void main(String[] args) throws Exception {
         Register r = new Register();
         //r.fillInfo("D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-x509.crt", "D:\\Segurança\\trab4-seguranca\\Pacote-T4\\Keys\\user01-pkcs8-aes.pem", "user01", "USER", "13052024", "13052024");

@@ -27,26 +27,35 @@ public class Main {
     public static void preRun() throws SQLException {
         log("1001");
         boolean isFirstAccess = DatabaseManager.isFirstAccess();
-        
-        //TODO: Remover testes das telas
-        //RegistrationManager.register(true, login);
-        //MainMenu.createAndShowGUI(login, frase_secreta);
-        //ExitScreen.createAndShowGUI(login, Group.ADMIN);
-        //MainMenu.createAndShowGUI("ca@grad.inf.puc-rio.br", "admin");
-         if (isFirstAccess) {
-             while(isFirstAccess){
-                 RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
-                     break;
+
+        if (isFirstAccess) {
+            while (isFirstAccess) {
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+                if (r == RegistrationManager.RegistrationResult.SUCCESS) {
+                    break;
                 }
             }
-         }
-         startAuthenticationProcess();
-         startLoginProcess();
-         startPasswordProcess();
-         startTotpProcess();
-         log("1003", login);
-         MainMenu.createAndShowGUI(login, frase_secreta);
+        }
+        startAuthenticationProcess();
+        // TODO: remover
+        // frase_secreta = new String("admin");
+    }
+
+    public static void run() throws SQLException {
+        // TODO: remover
+        // login = new String ("admin@inf1416.puc-rio.br");
+        // password = new String ("19052024");
+        while (true){
+            if (startLoginProcess()) {
+                if (startPasswordProcess()){
+                    if (startTotpProcess()){
+                        break;
+                    }
+                }
+            }
+        }
+        log("1003", login);
+        MainMenu.createAndShowGUI(login, frase_secreta);
     }
 
     private static void startAuthenticationProcess() throws SQLException {
@@ -64,7 +73,7 @@ public class Main {
         }
     }
 
-    private static void startLoginProcess() throws SQLException {
+    private static boolean startLoginProcess() throws SQLException {
         log("2001");
         try {
             while (true) {
@@ -73,34 +82,40 @@ public class Main {
                 if (loginExists) {
                     if (DatabaseManager.userIsBlocked(login)) {
                         log("2004", login);
-                        JOptionPane.showMessageDialog(null, "Seu acesso está bloqueado.");
-                    } else {
+                        JOptionPane.showMessageDialog(null, "Seu acesso esta bloqueado.");
+                        return false;
+                    }
+                    else {
                         log("2003", login);
                         break;
                     }
-                } else {
+                }
+                else {
                     log("2005", login);
-                    JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
+                    JOptionPane.showMessageDialog(null, "Login nao encontrado. Tente novamente.");
                 }
             }
             log("2002");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
+        return true;
     }
 
-    private static void startPasswordProcess() {
+    private static boolean startPasswordProcess() {
         try {
             log("3001", login);
             int attemptsRemaining = 3;
             List<String> passwords = Collections.emptyList();
             while (attemptsRemaining > 0) {
-                passwords = Login.collectPassword();
+                passwords = PasswordInput.createAndShowGUI();
                 String pass = LoginModel.loginStep2(Main.login, passwords);
                 if (pass != null) {
                     log("3003", login);
                     password = pass;
-                    break;
+                    return true;
+
                 } else {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0) {
@@ -108,11 +123,11 @@ public class Main {
                         DatabaseManager.blockUser(login);
                         log("3007", login);
                         JOptionPane.showMessageDialog(null, "Senha incorreta. Seu acesso foi bloqueado por 2 minutos");
-                        // TODO: Redirecionar para a tela de login invés disso
-                        endSystem();
-                    }
-                    else {
-                        if(attemptsRemaining == 1){
+                        // Reset and redirect to login screen
+                        resetAndRestart();
+                        return false;
+                    } else {
+                        if (attemptsRemaining == 2) {
                             log("3004", login);
                         } else {
                             log("3005", login);
@@ -125,9 +140,10 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 
-    private static void startTotpProcess() throws SQLException {
+    private static boolean startTotpProcess() throws SQLException {
         log("4001", login);
         try {
             int attemptsRemaining = 3;
@@ -138,7 +154,8 @@ public class Main {
                 if (codeCorrect) {
                     log("4003", login);
                     password = null;
-                    break;
+                    return true;
+
                 } else {
                     attemptsRemaining -= 1;
                     if (attemptsRemaining == 0) {
@@ -148,9 +165,9 @@ public class Main {
                         JOptionPane.showMessageDialog(null, "Código incorreto. Seu acesso foi bloqueado por 2 minutos");
                         // Reset and redirect to login screen
                         resetAndRestart();
-                        return;
+                        return false;
                     } else {
-                        if(attemptsRemaining == 1){
+                        if(attemptsRemaining == 2){
                             log("4004", login);
                         } else {
                             log("4005", login);
@@ -163,26 +180,14 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     public static void resetAndRestart() throws SQLException {
-        // Dispose of all open windows
-        for (Window window : Window.getWindows()) {
-            window.dispose();
-        }
-
-        // Reset state variables
+        log("1004", login);
         login = null;
         password = null;
-
-        // Restart the main logic on the Event Dispatch Thread
-        SwingUtilities.invokeLater(() -> {
-            try {
-                run();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
+        run();
     }
 
     public static void endSystem() throws SQLException {
