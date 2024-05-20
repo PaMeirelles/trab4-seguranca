@@ -55,8 +55,9 @@ public class ExitScreen {
             try {
                 DatabaseManager.log("8002", login);
                 frame.dispose();
-                close_session();
-            } catch (Exception ex) {
+                Main.resetAndRestart();
+                
+            } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
         });
@@ -90,8 +91,4 @@ public class ExitScreen {
         frame.add(exit_pan, gbc);
         frame.setVisible(true);
     }
-    private static void close_session() throws Exception {
-        Main.resetAndRestart();
-    }
-
 }

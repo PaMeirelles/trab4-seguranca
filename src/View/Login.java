@@ -90,7 +90,8 @@ public class Login extends JFrame {
         okButton.addActionListener(e -> dialog.dispose());
         cancelButton.addActionListener(e -> {
             try {
-                Main.endSystem();
+                dialog.dispose();
+                Main.resetAndRestart();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }

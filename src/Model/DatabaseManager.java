@@ -221,9 +221,19 @@ public class DatabaseManager {
         connection.close();
     }
 
-    public static String getAdmLogin(){
-        // TODO
-        return "admin@inf1416.puc-rio.br";
+    public static String getAdmLogin()throws SQLException{
+        Connection conn = getConnection();
+        String query = "SELECT login FROM usuarios WHERE group_id = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setInt(1, 1);
+        ResultSet resultSet = statement.executeQuery();
+        if (resultSet.next()) {
+            String login = resultSet.getString("login");
+            conn.close();
+            return login;
+        }
+        conn.close();
+        return null;
     }
 
     public static String getUserTotpKey(String login, String password) throws SQLException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {

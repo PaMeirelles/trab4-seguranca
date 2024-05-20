@@ -195,10 +195,6 @@ public class RegistrationForm extends JDialog{
             form.add(buttonGoBack);
         }
 
-        //TODO remover goback
-        form.add(buttonGoBack);
-        //======================
-
         gbc.gridy = 5;
         add(form, gbc);
         setVisible(true);
