@@ -59,6 +59,8 @@ public class ExitScreen {
                 
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         });
 

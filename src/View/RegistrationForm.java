@@ -179,15 +179,11 @@ public class RegistrationForm extends JDialog{
                 goBackPressed = true;
                 try {
                     DatabaseManager.log("6010", login);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                try {
                     dispose();
                     MainMenu.createAndShowGUI(login, Main.frase_secreta);
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
-                } 
+                }
             }
         });
     
