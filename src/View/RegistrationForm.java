@@ -31,7 +31,7 @@ public class RegistrationForm extends JDialog{
 
     public RegistrationForm(String login, Frame owner, boolean isFirstAccess, RegistrationCallback callback) throws SQLException {
         super(owner, "Cadastro de Usuario", true);
-        DatabaseManager.log("6001");
+        DatabaseManager.log("6001", login);
         
         setSize(600, 600);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

@@ -26,22 +26,23 @@ public class Main {
         //TODO: Remover testes das telas
         //RegistrationManager.register(true, login);
         //MainMenu.createAndShowGUI(login, frase_secreta);
-        //ExitScreen.createAndShowGUI(login, Group.ADMIN);
+        // ExitScreen.createAndShowGUI(login, Group.ADMIN);
         //MainMenu.createAndShowGUI("ca@grad.inf.puc-rio.br", "admin");
-         if (isFirstAccess) {
-             while(isFirstAccess){
-                 RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
-                 if(r == RegistrationManager.RegistrationResult.SUCCESS){
-                     break;
+
+        if (isFirstAccess) {
+            while(isFirstAccess){
+                RegistrationManager.RegistrationResult r = RegistrationManager.register(true, login);
+                if(r == RegistrationManager.RegistrationResult.SUCCESS){
+                    break;
                 }
             }
-         }
-         startAuthenticationProcess();
-         startLoginProcess();
-         startPasswordProcess();
-         startTotpProcess();
-         log("1003", login);
-         MainMenu.createAndShowGUI(login, frase_secreta);
+        }
+        startAuthenticationProcess();
+        startLoginProcess();
+        startPasswordProcess();
+        startTotpProcess();
+        log("1003", login);
+        MainMenu.createAndShowGUI(login, frase_secreta);
     }
     private static void startAuthenticationProcess() throws SQLException {
         frase_secreta = AdminValidation.secretPhraseInput();
@@ -74,7 +75,7 @@ public class Main {
                         break;
                     }
                 } else {
-                    log("2005");
+                    log("2005", login);
                     JOptionPane.showMessageDialog(null, "Login não encontrado. Tente novamente.");
                 }
             }
@@ -106,7 +107,7 @@ public class Main {
                         endSystem();
                     }
                     else {
-                        if(attemptsRemaining == 1){
+                        if(attemptsRemaining == 2){
                             log("3004", login);
                         }
                         else{
@@ -116,7 +117,7 @@ public class Main {
                     }
                 }
             }
-            log("3002");
+            log("3002", login);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,7 +146,7 @@ public class Main {
                         // TODO: Redirecionar para a tela de login
                         endSystem();
                     } else {
-                        if(attemptsRemaining == 1){
+                        if(attemptsRemaining == 2){
                             log("4004", login);
                         }
                         else{

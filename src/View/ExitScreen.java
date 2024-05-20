@@ -54,30 +54,33 @@ public class ExitScreen {
         endSession.addActionListener(e -> {
             try {
                 DatabaseManager.log("8002", login);
+                frame.dispose();
+                close_session();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            frame.dispose();
-            close_session();
+            
         });
 
         endSys.addActionListener(e -> {
             try {
                 DatabaseManager.log("8003", login);
+                Main.endSystem();
+
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            close_sys();
         });
 
         backToMenu.addActionListener(e -> {
             try {
                 DatabaseManager.log("8004", login);
+                frame.dispose();
+                MainMenu.createAndShowGUI(login, Main.frase_secreta);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
-            frame.dispose();
-            MainMenu.createAndShowGUI(login, Main.frase_secreta);
+            
         });
 
         exit_pan.add(endSession);
@@ -90,8 +93,5 @@ public class ExitScreen {
     }
     private static void close_session(){
         // TODO
-    }
-    private static void close_sys(){
-        System.exit(0);
     }
 }
