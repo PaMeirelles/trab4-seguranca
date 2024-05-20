@@ -103,8 +103,6 @@ public class FileExplorer {
                 String secretPhrase = secretPhraseField.getText();
                 try {
                     List<SecretFile> secretFiles = decodeIndex(secretPhrase, folderPath);
-                    //TODO: se pa remover
-                    //DatabaseManager.log("7006", login);
                     PublicKey publicKey = DatabaseManager.retrievePublicKey(login);
                     PrivateKey privateKey = Register.genPrivateKey(DatabaseManager.retrieveprivateKeyBytes(login), false, secretPhrase);
                     getTable(publicKey, privateKey, login, folderPath, table, secretFiles, buttonPanel);
@@ -157,9 +155,6 @@ public class FileExplorer {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         decodeFile(pathFolder, loggedUser, file, privateKey, publicKey);
-                        //TODO: se pa remover
-                        //DatabaseManager.log("7005", login);
-
                     }
                     catch (InvalidPhraseException ex){
                         JOptionPane.showMessageDialog(null, "Frase secreta incorreta");
