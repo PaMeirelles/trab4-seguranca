@@ -4,15 +4,9 @@ import Controller.Main;
 
 import javax.swing.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.function.Consumer;
 
 public class Login extends JFrame {
     public static String login() throws SQLException {

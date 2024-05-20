@@ -2,21 +2,11 @@ package View;
 
 import Model.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.security.AccessControlException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.List;
 import java.sql.SQLException;
-import Controller.*;
 
 
 import static Model.DatabaseManager.getUserGroup;
-import static Model.VaultHandler.decodeFile;
-import static Model.VaultHandler.decodeIndex;
 
 public class MainMenu {
     public static void createAndShowGUI(String login, String adminSecretPhrase) throws SQLException {

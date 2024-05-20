@@ -13,10 +13,10 @@ public class Header extends JPanel {
         String name;
         String groupString;
         if (group == Group.ADMIN){
-                groupString = new String ("ADMIN");
+                groupString = "ADMIN";
             }
             else {
-                groupString = new String ("USER");
+                groupString = "USER";
             }
         name = DatabaseManager.getUserName(login);
         JLabel lb_login = new JLabel("Login: " + login);
